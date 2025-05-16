@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>New Custom Test Case</title>
+    <link rel="stylesheet" href="../lib/style.css" />
+    <script src="/resources/testharness.js"></script>
+    <script src="/resources/testharnessreport.js"></script>
+  </head>
+
+  <body>
+    <div id="content-wrapper">
+      <div id="video-wrapper">
+        <video></video>
+        <div><div id="qr-code"></div></div>
+        <div><div id="status-text"></div></div>
+      </div>
+      <div>To show/hide debug overlay press up/down or button beneath</div>
+      <div id="debug-wrapper">
+        <div>
+          <div class="button" id="debug-button">Debug Overlay</div>
+        </div>
+        <div id="debug"></div>
+        <div id="log"></div>
+      </div>
+    </div>
+    <div id="info-overlay"></div>
+    <script src="../lib/mozilla/object-keys-polyfill.js"></script>
+    <script src="../lib/stefanpenner/es6-promise.min.js"></script>
+    <script src="../lib/player.js"></script>
+    <script src="../lib/manifest_parser.js"></script>
+    <script src="../lib/mpd-parser.js"></script>
+    <script src="../lib/wave-service.js"></script>
+    <script src="../lib/davidshimjs/qrcode.js"></script>
+    <script src="../lib/dpctf-testharness.js"></script>
+    <script src="../lib/hbbtv.js"></script>
+    <script>
+      // Global variables
+      
+      var TEST_INFO = {
+        id: "new-custom-test",
+        title: "New Custom Test Case",
+        description:
+          "This test case will explore, how the WAVE Streaming Media Test Suite is working.",
+        code: "C:\Users\l-hol\Desktop\Uni\Advanced_Media_Technologies\Forks\dpctf-tests\new-custom-test.html",
+      };
+
+      var video = document.querySelector("video");
+      var qrCode = document.getElementById("qr-code");
+      var statusText = document.getElementById("status-text");
+
+      console.log("video ", video);
+      console.log("qrCode ", qrCode);
+      console.log("statusText ", statusText);
+
+      var videoContentModel = ["https://dash.akamaized.net/WAVE/vectors/cfhd_sets/15_30_60/t1/2023-09-01/stream.mpd"];
+      var audioContentModel = [];
+
+      console.log("videoContentModel ", videoContentModel);
+      console.log("audioContentModel ", audioContentModel);
+
+      var dpctfTest = new DpctfTest({
+        testInfo: TEST_INFO,
+        videoContentModel: videoContentModel,
+        audioContentModel: audioContentModel,
+        videoElement: video,
+        qrCodeElement: qrCode,
+        statusTextElement: statusText,
+        infoOverlayElement: document.getElementById("info-overlay"),
+        executeTest: executeTest,
+        setupTest: setupTest,
+        usePlayout: false,
+      });
+      console.log("dpctfTest: ", dpctfTest);
+
+      function setupTest(player, done, parameters) {
+        console.log("Here in setupTest function");
+        done();
+      }
+
+      function executeTest(player, done, parameters) {
+        console.log("Here in executeTest function");
+        console.log("player: ", player);
+        console.log("done: ", done);
+        console.log("parameters: ", parameters);
+
+        var minBufferDuration = parameters.minBufferDuration / 1000;
+        console.log("minBufferDuration: ", minBufferDuration);
+        player.startBuffering();
+        console.log("Here after player.startBuffering");
+
+        dpctfTest.asyncTest(function (test) {
+          console.log("Here in asyncTest parameter function")
+          var query = location.search.replace(/\?/, "");
+          console.log("query: ", query);
+          var match = query.match(/redirect_time=([^&]+)/);
+          console.log("match: ", match);
+          var REDIRECT_TIME = match ? match[1] : null;
+          console.log("redirect_time: ", REDIRECT_TIME);
+          if (!REDIRECT_TIME) REDIRECT_TIME = 5;
+          video.addEventListener("ended", function (event) {
+            console.log("Here in ended event callback function");
+            assert_true(true);
+            test.done();
+          });
+        }, "video ended event fired");
+
+        console.log("Here before player.playOnBufferLoaded()");
+        player.playOnBufferLoaded(minBufferDuration).then(done);
+      }
+    </script>
+  </body>
+</html>
