@@ -91,7 +91,7 @@
 
           video.addEventListener("ended", function (event) {
             console.log("In anonym function in ended event")
-            assert_true(true);
+            assert_true(result);
             test.done();
           });
         }, "video ended event fired");
@@ -105,6 +105,9 @@
       xml = await fetch(videoContentModel[0])
       .then(res => res.text());
       xml = JSON.parse( JSON.stringify( xml ) );
+      if (!xml.includes('xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"') || !xml.includes('xsi:schemaLocation="urn:mpeg:DASH:schema:MPD:2011 DASH-MPD.xsd"')) {
+          xml = xml.replace('<MPD', '<MPD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mpeg:DASH:schema:MPD:2011 DASH-MPD.xsd"');
+      }
     }
   
     // Hauptschema
