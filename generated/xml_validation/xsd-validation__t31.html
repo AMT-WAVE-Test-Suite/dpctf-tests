@@ -36,6 +36,7 @@
     <script src="../lib/hbbtv.js"></script>
     <script src="../lib/xsdValidation/output.js"></script>
     <script>
+      console.log("Executing begin of last script");
       // Global variables
       var TEST_INFO = {
         id: "xsd-validation",
@@ -64,20 +65,32 @@
         usePlayout: false,
       });
 
+      var xml = getXml();
+      console.log(xml);
+      var schemaStr = getXsd();
+      console.log(schemaStr);
+      var schemaStr2 = getXlink();
+      console.log(schemaStr2);
+      var schemaStr3 = getXsd3();
+      console.log(schemaStr3);
+
       function executeTest(player, done, parameters) {
+        console.log("In function executeTest");
         var minBufferDuration = parameters.minBufferDuration / 1000;
         player.startBuffering();
 
         dpctfTest.asyncTest(function (test) {
+          console.log("In anonym function in asyncTest");
           var query = location.search.replace(/\?/, "");
           var match = query.match(/redirect_time=([^&]+)/);
           var REDIRECT_TIME = match ? match[1] : null;
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
-
+          console.log("Befor validate call");
           let result = validate();
           console.log(result);
 
           video.addEventListener("ended", function (event) {
+            console.log("In anonym function in ended event")
             assert_true(true);
             test.done();
           });
@@ -86,89 +99,94 @@
         player.playOnBufferLoaded(minBufferDuration).then(done);
       }
 
-    // Hauptschema
-    var schemaStr;
-    async function getXsd() {
-        schemaStr = await fetch("../lib/xsdValidation/DASH-MPD.xsd")
-        .then((res) => res.text());
-        schemaStr = JSON.parse( JSON.stringify( schemaStr ) );
-        return await schemaStr;
+    // MPD file
+    async function getXml() {
+      let mpd = await fetch(videoContentModel[0])
+      .then(res => res.text());
+      mpd = JSON.parse( JSON.stringify( mpd ) );
+      return await mpd;
     }
-    getXsd();
+  
+    // Hauptschema
+    async function getXsd() {
+        let schemaStrLocal = await fetch("../lib/xsdValidation/DASH-MPD.xsd")
+        .then((res) => res.text());
+        schemaStrLocal = JSON.parse( JSON.stringify( schemaStrLocal ) );
+        return await schemaStrLocal;
+    }
 
     // Abhängigkeit Hauptschemas (xlink)
-    var schemaStr2;
     async function getXlink() {
-        schemaStr2 = await fetch("../lib/xsdValidation/xlink.xsd")
+        let schemaStr2Local = await fetch("../lib/xsdValidation/xlink.xsd")
         .then((res) => res.text());
-        schemaStr2 = JSON.parse( JSON.stringify( schemaStr2 ) );
-        return await schemaStr2;
+        schemaStr2Local = JSON.parse( JSON.stringify( schemaStr2Local ) );
+        return await schemaStr2Local;
     }
-    getXlink();
 
     // Abhängigkeit von xlink (xml)
-    var schemaStr3;
     async function getXsd3() {
-        schemaStr3 = await fetch("../lib/xsdValidation/xml.xsd")
+        let schemaStr3Local = await fetch("../lib/xsdValidation/xml.xsd")
         .then((res) => res.text());
-        schemaStr3 = JSON.parse( JSON.stringify( schemaStr3 ) );
-        return await schemaStr3;
+        schemaStr3Local = JSON.parse( JSON.stringify( schemaStr3Local ) );
+        return await schemaStr3Local;
     }
-    getXsd3();
 
       function validate() {
-      // 1. Schreibe XSD-Dateien ins virtuelle Dateisystem
-      Module.FS.writeFile('/DASH-MPD.xsd', schemaStr);    // Hauptschema
-      Module.FS.writeFile('/xlink.xsd', schemaStr2);  // Abhängigkeit
-      Module.FS.writeFile('/xml.xsd', schemaStr3);      
+        console.log("In function validate");
+        // 1. Schreibe XSD-Dateien ins virtuelle Dateisystem
+        Module.FS.writeFile('/DASH-MPD.xsd', schemaStr);    // Hauptschema
+        Module.FS.writeFile('/xlink.xsd', schemaStr2);  // Abhängigkeit
+        Module.FS.writeFile('/xml.xsd', schemaStr3);      
 
-      // 2. XML-String in Speicher schreiben
-      const ptrXml = Module._malloc(lengthBytesUTF8(xml) + 1);
-      stringToUTF8(xml, Module.HEAPU8, ptrXml, lengthBytesUTF8(xml) + 1);
+        // 2. XML-String in Speicher schreiben
+        const ptrXml = Module._malloc(lengthBytesUTF8(xml) + 1);
+        stringToUTF8(xml, Module.HEAPU8, ptrXml, lengthBytesUTF8(xml) + 1);
 
-      // 3. XML-Dokument parsen
-      const xmlDoc = Module.ccall(
-        'xmlReadMemory',
-        'number',
-        ['number', 'number', 'number', 'number', 'number'],
-        [ptrXml, lengthBytesUTF8(xml), null, null, 0]
-      );
+        // 3. XML-Dokument parsen
+        const xmlDoc = Module.ccall(
+          'xmlReadMemory',
+          'number',
+          ['number', 'number', 'number', 'number', 'number'],
+          [ptrXml, lengthBytesUTF8(xml), null, null, 0]
+        );
 
-      // 4. Schema aus Datei (/DASH-MPD.xsd) laden (damit Imports funktionieren)
-      const schemaParserCtx = Module.ccall(
-        'xmlSchemaNewParserCtxt',
-        'number',
-        ['string'],
-        ['/DASH-MPD.xsd']
-      );
+        // 4. Schema aus Datei (/DASH-MPD.xsd) laden (damit Imports funktionieren)
+        const schemaParserCtx = Module.ccall(
+          'xmlSchemaNewParserCtxt',
+          'number',
+          ['string'],
+          ['/DASH-MPD.xsd']
+        );
 
-      // 5. Schema parsen & Validierungskontext erzeugen
-      const schema = Module.ccall('xmlSchemaParse', 'number', ['number'], [schemaParserCtx]);
-      const validCtx = Module.ccall('xmlSchemaNewValidCtxt', 'number', ['number'], [schema]);
+        // 5. Schema parsen & Validierungskontext erzeugen
+        const schema = Module.ccall('xmlSchemaParse', 'number', ['number'], [schemaParserCtx]);
+        const validCtx = Module.ccall('xmlSchemaNewValidCtxt', 'number', ['number'], [schema]);
 
-      // 6. XML validieren
-      const result = Module.ccall(
-        'xmlSchemaValidateDoc',
-        'number',
-        ['number', 'number'],
-        [validCtx, xmlDoc]
-      );
+        // 6. XML validieren
+        const result = Module.ccall(
+          'xmlSchemaValidateDoc',
+          'number',
+          ['number', 'number'],
+          [validCtx, xmlDoc]
+        );
 
-      // 7. Speicher freigeben
-      Module.ccall('xmlFreeDoc', 'void', ['number'], [xmlDoc]);
-      Module.ccall('xmlSchemaFreeValidCtxt', 'void', ['number'], [validCtx]);
-      Module.ccall('xmlSchemaFree', 'void', ['number'], [schema]);
-      Module._free(ptrXml);
+        // 7. Speicher freigeben
+        Module.ccall('xmlFreeDoc', 'void', ['number'], [xmlDoc]);
+        Module.ccall('xmlSchemaFreeValidCtxt', 'void', ['number'], [validCtx]);
+        Module.ccall('xmlSchemaFree', 'void', ['number'], [schema]);
+        Module._free(ptrXml);
 
-      // 8. Ergebnis zurückgeben
-      if (result === 0 ){
-        return true;
-      } else {
-        return false;
+        console.log("result ", result);
+        // 8. Ergebnis zurückgeben
+        if (result === 0 ){
+          return true;
+        } else {
+          return false;
+        }
       }
-    }
 
       function stringToUTF8(str, heap, offset, maxBytesToWrite) {
+        console.log("In function stringToUTF8");
         if (!(maxBytesToWrite > 0)) return 0;
         const utf8encoder = new TextEncoder();
         const encoded = utf8encoder.encode(str);
@@ -176,7 +194,7 @@
         heap.set(encoded.subarray(0, len), offset);
         heap[offset + len] = 0;
         return len;
-    }
+      }
     </script>
   </body>
 </html>
