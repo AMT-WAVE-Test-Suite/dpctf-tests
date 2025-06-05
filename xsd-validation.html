@@ -34,7 +34,7 @@
     <script src="../lib/davidshimjs/qrcode.js"></script>
     <script src="../lib/dpctf-testharness.js"></script>
     <script src="../lib/hbbtv.js"></script>
-    <script src="../lib/xsd-validation/output.js"></script>
+    <script src="../lib/xsdValidation/output.js"></script>
     <script>
       // Global variables
       var TEST_INFO = {
@@ -89,7 +89,7 @@
     // Hauptschema
     var schemaStr;
     async function getXsd() {
-        schemaStr = await fetch("../lib/xsd-validation/DASH-MPD.xsd")
+        schemaStr = await fetch("../lib/xsdValidation/DASH-MPD.xsd")
         .then((res) => res.text());
         schemaStr = JSON.parse( JSON.stringify( schemaStr ) );
         return await schemaStr;
@@ -99,7 +99,7 @@
     // Abhängigkeit Hauptschemas (xlink)
     var schemaStr2;
     async function getXlink() {
-        schemaStr2 = await fetch("../lib/xsd-validation/xlink.xsd")
+        schemaStr2 = await fetch("../lib/xsdValidation/xlink.xsd")
         .then((res) => res.text());
         schemaStr2 = JSON.parse( JSON.stringify( schemaStr2 ) );
         return await schemaStr2;
@@ -109,7 +109,7 @@
     // Abhängigkeit von xlink (xml)
     var schemaStr3;
     async function getXsd3() {
-        schemaStr3 = await fetch("../lib/xsd-validation/xml.xsd")
+        schemaStr3 = await fetch("../lib/xsdValidation/xml.xsd")
         .then((res) => res.text());
         schemaStr3 = JSON.parse( JSON.stringify( schemaStr3 ) );
         return await schemaStr3;
