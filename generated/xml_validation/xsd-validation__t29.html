@@ -36,7 +36,7 @@
     <script src="../lib/hbbtv.js"></script>
     <script src="../lib/xsdValidation/output.js"></script>
     <script>
-      console.log("Executing begin of last script");
+      console.log("Execution begin of last script");
       // Global variables
       var TEST_INFO = {
         id: "xsd-validation",
@@ -101,6 +101,7 @@
 
     // MPD file
     async function getXml() {
+      console.log("In function getXml");
       xml = await fetch(videoContentModel[0])
       .then(res => res.text());
       xml = JSON.parse( JSON.stringify( xml ) );
@@ -108,23 +109,26 @@
   
     // Hauptschema
     async function getXsd() {
-      let schemaStr = await fetch("../lib/xsdValidation/DASH-MPD.xsd")
+      console.log("In function getXsd");
+      schemaStr = await fetch("../lib/xsdValidation/DASH-MPD.xsd")
       .then((res) => res.text());
       schemaStr = JSON.parse( JSON.stringify( schemaStr ) );
     }
 
     // Abhängigkeit Hauptschemas (xlink)
     async function getXlink() {
-      let schemaStr2 = await fetch("../lib/xsdValidation/xlink.xsd")
+      console.log("In function getXlink");
+      schemaStr2 = await fetch("../lib/xsdValidation/xlink.xsd")
       .then((res) => res.text());
       schemaStr2 = JSON.parse( JSON.stringify( schemaStr2 ) );
     }
 
     // Abhängigkeit von xlink (xml)
     async function getXsd3() {
-        let schemaStr3 = await fetch("../lib/xsdValidation/xml.xsd")
-        .then((res) => res.text());
-        schemaStr3 = JSON.parse( JSON.stringify( schemaStr3 ) );
+      console.log("In function getXsd3");
+      schemaStr3 = await fetch("../lib/xsdValidation/xml.xsd")
+      .then((res) => res.text());
+      schemaStr3 = JSON.parse( JSON.stringify( schemaStr3 ) );
     }
 
       function validate() {
