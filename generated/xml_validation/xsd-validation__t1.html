@@ -76,27 +76,31 @@
 
       function executeTest(player, done, parameters) {
         console.log("In function executeTest");
-        var minBufferDuration = parameters.minBufferDuration / 1000;
-        player.startBuffering();
+        // var minBufferDuration = parameters.minBufferDuration / 1000;
+        // player.startBuffering();
 
         dpctfTest.asyncTest(function (test) {
           console.log("In anonym function in asyncTest");
-          var query = location.search.replace(/\?/, "");
+          /* var query = location.search.replace(/\?/, "");
           var match = query.match(/redirect_time=([^&]+)/);
           var REDIRECT_TIME = match ? match[1] : null;
-          if (!REDIRECT_TIME) REDIRECT_TIME = 5;
+          if (!REDIRECT_TIME) REDIRECT_TIME = 5; */
           console.log("Befor validate call");
           let result = validate();
+
           console.log(result);
 
-          video.addEventListener("playing", function (event) {
+          assert_true(result);
+          test.done();
+
+          /* video.addEventListener("loadedmetadata", function (event) {
             console.log("In anonym function in ended event")
             assert_true(result);
             test.done();
-          });
-        }, "video ended event fired");
+          }); */
+        }, "mpd check done");
 
-        player.playOnBufferLoaded(minBufferDuration).then(done);
+        // player.playOnBufferLoaded(minBufferDuration).then(done);
       }
 
       // save MPD file as utf-8 string
