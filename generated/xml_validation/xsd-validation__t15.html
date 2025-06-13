@@ -81,9 +81,7 @@
 
         dpctfTest.asyncTest(function (test) {
           console.log("In anonym function in asyncTest");
-
-          console.log(parse(schemaStr));
-
+          
           var query = location.search.replace(/\?/, "");
           var match = query.match(/redirect_time=([^&]+)/);
           var REDIRECT_TIME = match ? match[1] : null;
