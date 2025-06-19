@@ -82,7 +82,7 @@
           console.log(JSON.stringify(segmentList, null, 2));
           console.dir(segmentList);
           console.log(videoContentModel[0]);
-          segmentUri = segmentList.playlists[0].segments.map(e => e.map.uri).map(e => videoContentModel[0] + e);
+          segmentUri = segmentList.playlists[0].segments.map(e => e.uri).map(e => videoContentModel[0].split("/").filter(e => !e.includes(".mpd")).join("/") + "/" + e);
           console.log(segmentUri);
           console.log(JSON.stringify(segmentUri, null, 2));
           console.dir(segmentList);
