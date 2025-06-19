@@ -79,8 +79,24 @@
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
 
           var segmentList = mpdParser.parse(xml);
-          console.log(JSON.stringify(segmentList, null, 2))
+          console.log(JSON.stringify(segmentList, null, 2));
           console.dir(segmentList);
+          console.log(videoContentModel[0]);
+          segmentUri = segmentList.playlists[0].segments.map(e => e.map.uri).map(e => videoContentModel[0] + e);
+          console.log(segmentUri);
+          console.log(JSON.stringify(segmentUri, null, 2));
+          console.dir(segmentList);
+
+          for (let i = 0; i < segmentUri.length; i++) {
+            fetch(segmentUri[i], {method: "HEAD"})
+            .then(res => {
+                if (String(res.status).startsWith("4") || String(res.status).startsWith("5")) {
+                  console.log("Segment nicht vorhanden!");
+                } else {
+                  console.log("Segment vorhanden");
+                }
+            });
+          }
 
           assert_true(true);
           test.done();
