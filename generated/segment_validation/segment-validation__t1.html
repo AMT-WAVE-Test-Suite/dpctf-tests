@@ -62,6 +62,9 @@
         executeTest: executeTest,
         usePlayout: false,
       });
+      
+      var xml;
+      getXml();
 
       function executeTest(player, done, parameters) {
         console.log("In executeTest");
@@ -75,7 +78,7 @@
           var REDIRECT_TIME = match ? match[1] : null;
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
 
-          var list = mpdParser.parse(videoContentModel[0]);
+          var list = mpdParser.parse(xml);
           console.log(list);
 
           assert_true(true);
@@ -85,6 +88,14 @@
         
         console.log("After asyncTest");
         player.playOnBufferLoaded(minBufferDuration).then(done);
+      }
+
+      // save MPD file as utf-8 string
+      async function getXml() {
+        console.log("In function getXml");
+        xml = await fetch(videoContentModel[0])
+        .then(res => res.text());
+        xml = JSON.parse( JSON.stringify( xml ) );
       }
     </script>
   </body>
