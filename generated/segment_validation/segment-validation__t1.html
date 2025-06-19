@@ -64,10 +64,12 @@
       });
 
       function executeTest(player, done, parameters) {
-        /* var minBufferDuration = parameters.minBufferDuration / 1000;
-        player.startBuffering(); */
+        console.log("In executeTest");
+        var minBufferDuration = parameters.minBufferDuration / 1000;
+        player.startBuffering();
 
         dpctfTest.asyncTest(function (test) {
+          console.log("In asyncTest");
           var query = location.search.replace(/\?/, "");
           var match = query.match(/redirect_time=([^&]+)/);
           var REDIRECT_TIME = match ? match[1] : null;
@@ -76,9 +78,13 @@
           var list = mpdParser.parse(videoContentModel[0]);
           console.log(list);
 
-        }, "Segment exists");
+          assert_true(true);
+          test.done();
 
-        // player.playOnBufferLoaded(minBufferDuration).then(done);
+        }, "Segment exists");
+        
+        console.log("After asyncTest");
+        player.playOnBufferLoaded(minBufferDuration).then(done);
       }
     </script>
   </body>

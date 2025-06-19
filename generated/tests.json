@@ -19354,6 +19354,49 @@
                 "audio": []
             }
         },
+        "5b639f4a601e90f4f3febc723db89331": {
+            "path": "C:\\Users\\l-hol\\Desktop\\Uni\\Advanced_Media_Technologies\\Forks\\dpctf-tests\\generated\\segment_validation/segment-validation__t1.html",
+            "video": [
+                "https://dash.akamaized.net/WAVE/vectors/cfhd_sets/15_30_60/t1/2023-09-01/stream.mpd"
+            ],
+            "audio": [],
+            "code": "C:\\Users\\l-hol\\Desktop\\Uni\\Advanced_Media_Technologies\\Forks\\dpctf-tests\\segment-validation.html",
+            "switchingSets": {
+                "video": [
+                    {
+                        "cmaf_track_duration": "PT0H0M30.000S",
+                        "fragment_duration": "PT0H0M2.000S",
+                        "timescale": 15360,
+                        "segmentTimeline": [
+                            {
+                                "r": 14,
+                                "t": 0,
+                                "d": 30720
+                            }
+                        ],
+                        "source": "tos_L1_1920x1080@30_30 version 4 (2023-02-13)",
+                        "representations": {
+                            "1": {
+                                "period": 1,
+                                "duration": 30,
+                                "type": "video",
+                                "frame_rate": "30",
+                                "fragment_duration": 2.0,
+                                "timescale": 15360,
+                                "segmentTimeline": [
+                                    {
+                                        "r": 14,
+                                        "t": 0,
+                                        "d": 30720
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "audio": []
+            }
+        },
         "1c9f9713ecf02d817f9cdfcd33a1c6b1": {
             "path": "C:\\Users\\l-hol\\Desktop\\Uni\\Advanced_Media_Technologies\\Forks\\dpctf-tests\\generated\\cfhd_15_30_60-online/switching-set-playback__ss1-1.html",
             "video": [
