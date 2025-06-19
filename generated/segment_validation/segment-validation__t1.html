@@ -62,7 +62,7 @@
         executeTest: executeTest,
         usePlayout: false,
       });
-      
+
       var xml;
       getXml();
 
@@ -78,8 +78,9 @@
           var REDIRECT_TIME = match ? match[1] : null;
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
 
-          var list = mpdParser.parse(xml);
-          console.log(list);
+          var segmentList = mpdParser.parse(xml);
+          console.log(JSON.stringify(segmentList, null, 2))
+          console.dir(segmentList);
 
           assert_true(true);
           test.done();
