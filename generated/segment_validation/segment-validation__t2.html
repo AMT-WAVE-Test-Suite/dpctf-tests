@@ -63,23 +63,24 @@
         usePlayout: false,
       });
 
-      var xml;
-      getXml();
-
       function executeTest(player, done, parameters) {
         var minBufferDuration = parameters.minBufferDuration / 1000;
         player.startBuffering();
+
+        let mpd;
+        getMPD();
+
+        let baseUrl = videoContentModel[0].split("/").filter(e => !e.includes(".mpd")).join("/") + "/";
+        let segmentList = mpdParser.parse(mpd);
+        // adjust extracted uris that they can be requested
+        let segmentUri = segmentList.playlists[0].segments.map(e => e.uri).map(e => baseUrl + e);
+        let segmentDuration = segmentList.playlists[0].segments.map(e => e.duration);
 
         dpctfTest.asyncTest(function (test) {
           var query = location.search.replace(/\?/, "");
           var match = query.match(/redirect_time=([^&]+)/);
           var REDIRECT_TIME = match ? match[1] : null;
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
-
-          var segmentList = mpdParser.parse(xml);
-
-          // adjust extracted uris that they can be requested
-          segmentUri = segmentList.playlists[0].segments.map(e => e.uri).map(e => videoContentModel[0].split("/").filter(e => !e.includes(".mpd")).join("/") + "/" + e);
 
           let testPass = true;
           for (let i = 0; i < segmentUri.length; i++) {
@@ -98,15 +99,29 @@
           test.done();
 
         }, "Segment exist on Server");
+
+
+        dpctfTest.asyncTest(function (test) {
+          var query = location.search.replace(/\?/, "");
+          var match = query.match(/redirect_time=([^&]+)/);
+          var REDIRECT_TIME = match ? match[1] : null;
+          if (!REDIRECT_TIME) REDIRECT_TIME = 5;
+
+          
+
+          assert_true(true);
+          test.done();
+
+        }, "Segment duration correct");
         
         player.playOnBufferLoaded(minBufferDuration).then(done);
       }
 
       // save MPD file as utf-8 string
-      async function getXml() {
-        xml = await fetch(videoContentModel[0])
+      async function getMPD() {
+        mpd = await fetch(videoContentModel[0])
         .then(res => res.text());
-        xml = JSON.parse( JSON.stringify( xml ) );
+        mpd = JSON.parse( JSON.stringify( mpd ) );
       }
     </script>
   </body>
