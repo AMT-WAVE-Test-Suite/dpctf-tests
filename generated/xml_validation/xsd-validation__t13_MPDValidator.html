@@ -43,15 +43,15 @@
         title: "XSD Validation for MPD files",
         description:
           "Template for XSD Validations.",
-        code: "{{TEMPLATE_NAME}}",
+        code: "xsd-validation.html",
       };
 
       var video = document.querySelector("video");
       var qrCode = document.getElementById("qr-code");
       var statusText = document.getElementById("status-text");
 
-      var videoContentModel = "{{VIDEO_MPD_URL}}";
-      var xsdFileUrl = "{{AUDIO_MPD_URL}}"; // Now used for XSD file URL
+      var videoContentModel = ["https://dash.akamaized.net/WAVE/vectors/cfhd_sets/15_30_60/t13/2023-09-01/stream.mpd"];
+      var xsdFileUrl = ["https://raw.githubusercontent.com/Dash-Industry-Forum/MPEG-Conformance-and-reference-source/refs/heads/master/conformance/MPDValidator/schemas/DASH-MPD.xsd"]; // Now used for XSD file URL
 
       var dpctfTest = new DpctfTest({
         testInfo: TEST_INFO,
