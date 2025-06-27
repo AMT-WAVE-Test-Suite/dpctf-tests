@@ -50,7 +50,7 @@
       var qrCode = document.getElementById("qr-code");
       var statusText = document.getElementById("status-text");
 
-      var videoContentModel = ["https://raw.githubusercontent.com/AMT-WAVE-Test-Suite/xmlValidator/refs/heads/main/invalid.mpd?token=GHSAT0AAAAAADC62J3W76IBHEJAJ7AJULVA2C6XERA"];
+      var videoContentModel = ["https://raw.githubusercontent.com/AMT-WAVE-Test-Suite/dpctf-tests/refs/heads/master/invalid.mpd"];
       var audioContentModel = [];
 
       var dpctfTest = new DpctfTest({
@@ -96,7 +96,7 @@
 
         }, "MPD Schema Validation");
 
-        //player.playOnBufferLoaded(minBufferDuration).then(done);
+        player.playOnBufferLoaded(minBufferDuration).then(done);
       }
 
       // save MPD file as utf-8 string
