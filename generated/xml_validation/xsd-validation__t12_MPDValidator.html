@@ -73,13 +73,13 @@
       initializeSchemas();
 
       async function initializeSchemas() {
-        console.log("🚀 INITIALIZATION STARTED 🚀");
+        console.log("INITIALIZATION STARTED");
         try {
           await getXml();
           await loadMainSchemaAndDependencies();
-          console.log("✅ INITIALIZATION COMPLETED SUCCESSFULLY ✅");
+          console.log("INITIALIZATION COMPLETED SUCCESSFULLY");
         } catch (error) {
-          console.error("❌ INITIALIZATION FAILED ❌", error);
+          console.error("INITIALIZATION FAILED", error);
         }
       }
 
@@ -110,7 +110,7 @@
 
       // Save MPD file as utf-8 string
       async function getXml() {
-        console.log("📄 Loading MPD XML file...");
+        console.log("Loading MPD XML file...");
         console.log("MPD URL:", videoContentModel[0]);
 
         xml = await fetch(videoContentModel[0])
@@ -120,30 +120,23 @@
         });
         xml = JSON.parse( JSON.stringify( xml ) );
 
-        console.log("Original XML length:", xml.length);
         console.log("Checking for required schema attributes...");
-
         const hasXmlSchemaInstance = xml.includes('xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"');
         const hasSchemaLocation = xml.includes('xsi:schemaLocation="urn:mpeg:DASH:schema:MPD:2011 DASH-MPD.xsd"');
 
-        console.log("Has xmlns:xsi attribute:", hasXmlSchemaInstance);
-        console.log("Has schemaLocation attribute:", hasSchemaLocation);
-
         if (!hasXmlSchemaInstance || !hasSchemaLocation) {
-          console.log("Adding missing schema attributes to MPD...");
           xml = xml.replace('<MPD', '<MPD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mpeg:DASH:schema:MPD:2011 DASH-MPD.xsd"');
           console.log("Schema attributes added");
         } else {
           console.log("Schema attributes already present");
         }
 
-        console.log("📄 MPD XML loaded successfully, final length:", xml.length);
+        console.log("MPD XML loaded successfully, final length:", xml.length);
       }
 
       // Load main schema and automatically discover and load dependencies
       async function loadMainSchemaAndDependencies() {
         console.log("=== Loading main schema and dependencies ===");
-        console.log("Main XSD URL:", xsdFileUrl);
 
         try {
           // Load main schema
@@ -154,15 +147,10 @@
               return res.text();
             });
           mainSchemaContent = JSON.parse(JSON.stringify(mainSchemaContent));
-          console.log("Main schema loaded, content length:", mainSchemaContent.length);
-
-          // Extract base URL for relative imports
-          const baseUrl = getBaseUrl(xsdFileUrl);
-          console.log("Base URL for relative imports:", baseUrl);
 
           // Find and load all dependencies recursively
           console.log("Starting recursive dependency loading...");
-          await loadDependenciesRecursively(mainSchemaContent, baseUrl, new Set());
+          await loadDependenciesRecursively(mainSchemaContent, new Set());
 
           console.log("=== All schemas loaded successfully ===");
           console.log("Total dependencies loaded:", dependencySchemas.size);
@@ -174,48 +162,41 @@
       }
 
       // Extract dependencies from XSD content and load them recursively
-      async function loadDependenciesRecursively(schemaContent, baseUrl, loadedSchemas) {
-        console.log("--- loadDependenciesRecursively called ---");
-        console.log("Base URL:", baseUrl);
-        console.log("Already loaded schemas:", Array.from(loadedSchemas));
-
+      async function loadDependenciesRecursively(schemaContent, loadedSchemas) {
         const dependencies = extractDependencies(schemaContent);
         console.log("Dependencies found:", dependencies.length);
 
         for (const dependency of dependencies) {
-          const resolvedUrl = dependency.resolvedUrl;
-          const fileName = dependency.fileName;
+          const downloadUrl = dependency.domain + dependency.fileName;
+          console.log(`Processing dependency: "${downloadUrl}"`);
 
-          console.log(`Processing dependency - fileName: "${fileName}", resolvedUrl: "${resolvedUrl}"`);
-
-          if (loadedSchemas.has(resolvedUrl)) {
-            console.log(`Skipping already loaded schema: ${resolvedUrl}`);
+          if (loadedSchemas.has(downloadUrl)) {
+            console.log(`Skipping already loaded schema: ${downloadUrl}`);
             continue; // Already loaded
           }
 
-          loadedSchemas.add(resolvedUrl);
-          console.log(`Added to loaded schemas: ${resolvedUrl}`);
+          loadedSchemas.add(downloadUrl);
+          console.log(`Added to loaded schemas: ${downloadUrl}`);
 
           try {
-            console.log(`Fetching dependency: ${resolvedUrl}`);
+            console.log(`Fetching dependency: ${downloadUrl}`);
 
-            const dependencyContent = await fetch(resolvedUrl)
+            const xsdDependency = await fetch(downloadUrl)
               .then(res => {
-                console.log(`Dependency fetch response status for ${resolvedUrl}:`, res.status);
+                console.log(`Dependency fetch response status for ${downloadUrl}:`, res.status);
                 if (!res.ok) {
                   throw new Error(`HTTP ${res.status}: ${res.statusText}`);
                 }
                 return res.text();
               });
-            const cleanContent = JSON.parse(JSON.stringify(dependencyContent));
+            const xsdDependencyString = JSON.parse(JSON.stringify(xsdDependency));
 
-            console.log(`Successfully loaded dependency "${fileName}", content length:`, cleanContent.length);
-            dependencySchemas.set(fileName, cleanContent);
+            console.log(`Successfully loaded dependency "${fileName}", content length:`, xsdDependencyString.length);
+            dependencySchemas.set(fileName, xsdDependencyString);
 
             // Recursively load dependencies of this dependency
-            const depBaseUrl = getBaseUrl(resolvedUrl);
-            console.log(`Recursively checking dependencies for ${fileName} with base URL: ${depBaseUrl}`);
-            await loadDependenciesRecursively(cleanContent, depBaseUrl, loadedSchemas);
+            console.log(`Recursively checking dependencies for ${fileName}`);
+            await loadDependenciesRecursively(xsdDependencyString, loadedSchemas);
 
           } catch (error) {
             console.warn(`Failed to load dependency "${fileName}" from ${resolvedUrl}:`, error.message);
@@ -228,154 +209,64 @@
       // Extract import and include statements from XSD content
       function extractDependencies(schemaContent) {
         console.log("*** extractDependencies called ***");
-        console.log("Schema content length:", schemaContent.length);
 
         const dependencies = [];
 
         // Combined regex to capture both namespace and schemaLocation
-        const importRegex = /<(?:xs:)?import[^>]*(?:namespace\s*=\s*["']([^"']+)["'][^>]*)?(?:schemaLocation\s*=\s*["']([^"']+)["'][^>]*)?[^>]*>/gi;
-        const includeRegex = /<(?:xs:)?include[^>]*schemaLocation\s*=\s*["']([^"']+)["'][^>]*>/gi;
+        const importRegex = /<xs:import[^>]*namespace\s*=\s*["']([^"']*\/)[^"']*["'][^>]*schemaLocation\s*=\s*["']([^"']*)["'][^>]*>/gi;
 
         let match;
 
         console.log("Searching for import statements...");
         // Find imports with potential namespace resolution
         while ((match = importRegex.exec(schemaContent)) !== null) {
+          console.log(`Regex match: "${match}"`);
           const namespace = match[1];
           const schemaLocation = match[2];
 
           console.log(`Found import - namespace: "${namespace}", schemaLocation: "${schemaLocation}"`);
 
-          if (schemaLocation) {
-            const resolvedDependency = resolveDependencyUrl(namespace, schemaLocation);
-            console.log(`Resolved dependency:`, resolvedDependency);
-            dependencies.push(resolvedDependency);
-          } else {
-            console.log("Import statement has no schemaLocation, skipping");
-          }
-        }
-
-        console.log("Searching for include statements...");
-        // Find includes (no namespace resolution needed)
-        while ((match = includeRegex.exec(schemaContent)) !== null) {
-          const schemaLocation = match[1];
-          console.log(`Found include - schemaLocation: "${schemaLocation}"`);
-
           const includeDependency = {
-            resolvedUrl: schemaLocation,
+            domain: namespace,
             fileName: schemaLocation
           };
           console.log(`Include dependency:`, includeDependency);
           dependencies.push(includeDependency);
+
         }
-
-        console.log("*** extractDependencies result ***");
-        console.log("Total dependencies found:", dependencies.length);
-        dependencies.forEach((dep, index) => {
-          console.log(`Dependency ${index + 1}: fileName="${dep.fileName}", resolvedUrl="${dep.resolvedUrl}"`);
-        });
-
         return dependencies;
-      }
-
-      // Resolve dependency URL based on namespace and schemaLocation
-      function resolveDependencyUrl(namespace, schemaLocation) {
-        console.log(`>>> resolveDependencyUrl called <<<`);
-        console.log(`Input - namespace: "${namespace}", schemaLocation: "${schemaLocation}"`);
-
-        // If schemaLocation is already absolute, use it as-is
-        if (schemaLocation.startsWith('http://') || schemaLocation.startsWith('https://')) {
-          const result = {
-            resolvedUrl: schemaLocation,
-            fileName: getFileNameFromUrl(schemaLocation)
-          };
-          console.log(`SchemaLocation is absolute URL, result:`, result);
-          return result;
-        }
-
-        let resolvedUrl = schemaLocation;
-
-        // If namespace exists and schemaLocation is relative, construct URL from namespace
-        if (namespace && !schemaLocation.startsWith('/')) {
-          console.log(`Namespace exists and schemaLocation is relative, constructing URL...`);
-
-          // Remove trailing slash from namespace if present
-          const baseNamespace = namespace.endsWith('/') ? namespace.slice(0, -1) : namespace;
-          console.log(`Base namespace (after removing trailing slash): "${baseNamespace}"`);
-
-          // Construct full URL by combining namespace with schemaLocation
-          resolvedUrl = baseNamespace + '/' + schemaLocation;
-          console.log(`Constructed resolved URL: "${resolvedUrl}"`);
-        } else {
-          console.log(`No namespace or schemaLocation is absolute/root path, using schemaLocation as-is`);
-        }
-
-        const result = {
-          resolvedUrl: resolvedUrl,
-          fileName: schemaLocation // Keep original filename for file system
-        };
-
-        console.log(`>>> resolveDependencyUrl result <<<`, result);
-        return result;
-      }
-
-      // Get base URL from a full URL
-      function getBaseUrl(url) {
-        const lastSlashIndex = url.lastIndexOf('/');
-        return lastSlashIndex >= 0 ? url.substring(0, lastSlashIndex + 1) : '';
-      }
-
-      // Resolve relative URL against base URL (fallback for non-namespace cases)
-      function resolveUrl(relativeUrl, baseUrl) {
-        if (relativeUrl.startsWith('http://') || relativeUrl.startsWith('https://')) {
-          return relativeUrl; // Already absolute
-        }
-
-        if (relativeUrl.startsWith('/')) {
-          // Absolute path - need to get the origin from baseUrl
-          const urlObj = new URL(baseUrl);
-          return urlObj.origin + relativeUrl;
-        }
-
-        // Relative path
-        return baseUrl + relativeUrl;
       }
 
       function validate() {
         console.log("=== VALIDATION STARTED ===");
 
         try {
-          // Write main schema to virtual file system
-          const mainSchemaFileName = getFileNameFromUrl(xsdFileUrl);
-          console.log(`Writing main schema to virtual FS: /${mainSchemaFileName}`);
+          const mainSchemaFileName = xsdFileUrl.split('/').pop()
+          // 1. write XSD-files into a virtual directory
+          console.log("Writing xsd-schemas to virtual FS:");
           Module.FS.writeFile('/' + mainSchemaFileName, mainSchemaContent);
-
-          // Write all dependency schemas to virtual file system
-          console.log("Writing dependency schemas to virtual FS:");
-          dependencySchemas.forEach((content, fileName) => {
-            const cleanFileName = fileName.split('/').pop(); // Get just the filename
-            console.log(`  Writing: /${cleanFileName} (original: ${fileName})`);
-            Module.FS.writeFile('/' + cleanFileName, content);
+          dependencySchemas.forEach((xsdFile, fileName) => {
+            console.log(`  Writing: /${fileName}`);
+            Module.FS.writeFile('/' + fileName, content);
           });
 
+          // 2. write the XML-string to memory
           console.log("Allocating memory for XML content...");
-          // Write the XML string to memory
           const ptrXml = Module._malloc(lengthBytesUTF8(xml) + 1);
           stringToUTF8(xml, Module.HEAPU8, ptrXml, lengthBytesUTF8(xml) + 1);
           console.log("XML written to memory at pointer:", ptrXml);
 
+          // 3. parse XML-document
           console.log("Parsing XML document...");
-          // Parse XML document
           const xmlDoc = Module.ccall(
             'xmlReadMemory',
             'number',
             ['number', 'number', 'number', 'number', 'number'],
             [ptrXml, lengthBytesUTF8(xml), null, null, 0]
           );
-          console.log("XML document parsed, pointer:", xmlDoc);
 
+          // 4. load scheme from file DASH-MPD.xsd (that imports work)
           console.log(`Creating schema parser context for: /${mainSchemaFileName}`);
-          // Load schema from main file
           const schemaParserCtx = Module.ccall(
             'xmlSchemaNewParserCtxt',
             'number',
@@ -384,39 +275,34 @@
           );
           console.log("Schema parser context created:", schemaParserCtx);
 
-          console.log("Parsing schema...");
-          // Parse schema and create validation context
+          // 5. parse schema and create validation context
           const schema = Module.ccall('xmlSchemaParse', 'number', ['number'], [schemaParserCtx]);
           console.log("Schema parsed, pointer:", schema);
-
-          console.log("Creating validation context...");
           const validCtx = Module.ccall('xmlSchemaNewValidCtxt', 'number', ['number'], [schema]);
           console.log("Validation context created:", validCtx);
 
+          // 6. validate XML
           console.log("Validating XML document against schema...");
-          // Validate XML
           const result = Module.ccall(
             'xmlSchemaValidateDoc',
             'number',
             ['number', 'number'],
             [validCtx, xmlDoc]
           );
-          console.log("Validation completed, raw result:", result);
 
+          // 7. release memory
           console.log("Cleaning up memory...");
-          // Release memory
           Module.ccall('xmlFreeDoc', 'void', ['number'], [xmlDoc]);
           Module.ccall('xmlSchemaFreeValidCtxt', 'void', ['number'], [validCtx]);
           Module.ccall('xmlSchemaFree', 'void', ['number'], [schema]);
           Module.ccall('xmlSchemaFreeParserCtxt', 'void', ['number'], [schemaParserCtx]);
           Module._free(ptrXml);
-          console.log("Memory cleanup completed");
 
           console.log("=== VALIDATION RESULT ===");
           console.log("Raw validation result:", result);
           console.log("Validation success:", result === 0);
 
-          // Return result (0 = valid, non-zero = invalid)
+          // 8. return result
           const isValid = result === 0;
           console.log("=== VALIDATION FINISHED ===");
           return isValid;
@@ -426,11 +312,6 @@
           console.error("Error stack:", error.stack);
           return false;
         }
-      }
-
-      // Extract filename from URL
-      function getFileNameFromUrl(url) {
-        return url.split('/').pop() || 'schema.xsd';
       }
 
       function stringToUTF8(str, heap, offset, maxBytesToWrite) {
