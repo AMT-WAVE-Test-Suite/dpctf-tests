@@ -36,7 +36,6 @@
     <script src="../lib/hbbtv.js"></script>
     <script src="../lib/xsdValidation/output.js"></script>
     <script>
-      console.log("Execution begin of last script");
       // Global variables
       var TEST_INFO = {
         id: "xsd-validation",
@@ -65,6 +64,7 @@
         usePlayout: false,
       });
 
+      var logger = dpctfTest.getLogger();
       var xml;
       var mainSchemaContent;
       var dependencySchemas = new Map(); // Store all dependency schemas
@@ -73,32 +73,29 @@
       initializeSchemas();
 
       async function initializeSchemas() {
-        console.log("INITIALIZATION STARTED");
+        logger.log("INITIALIZATION STARTED");
         try {
           await getXml();
           await loadMainSchemaAndDependencies();
-          console.log("INITIALIZATION COMPLETED SUCCESSFULLY");
+          logger.log("INITIALIZATION COMPLETED SUCCESSFULLY ");
         } catch (error) {
-          console.error("INITIALIZATION FAILED", error);
+          logger.error("INITIALIZATION FAILED ", error);
         }
       }
 
       function executeTest(player, done, parameters) {
-        console.log("In function executeTest");
         var minBufferDuration = parameters.minBufferDuration / 1000;
         player.startBuffering();
 
         dpctfTest.asyncTest(function (test) {
-          console.log("In anonym function in asyncTest");
-
           var query = location.search.replace(/\?/, "");
           var match = query.match(/redirect_time=([^&]+)/);
           var REDIRECT_TIME = match ? match[1] : null;
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
-          console.log("Before validate call");
+
           let result = validate();
 
-          console.log(result);
+          logger.log("MPD Validation result: " + result);
 
           assert_true(result);
           test.done();
@@ -110,53 +107,61 @@
 
       // Save MPD file as utf-8 string
       async function getXml() {
-        console.log("Loading MPD XML file...");
-        console.log("MPD URL:", videoContentModel[0]);
+        logger.log("Loading MPD XML file...");
+        logger.log("MPD URL:", videoContentModel[0]);
 
         xml = await fetch(videoContentModel[0])
         .then(res => {
-          console.log("MPD fetch response status:", res.status);
+          logger.log("MPD fetch response status:", res.status);
           return res.text();
         });
         xml = JSON.parse( JSON.stringify( xml ) );
 
-        console.log("Checking for required schema attributes...");
+        logger.log("Original XML length:", xml.length);
+        logger.log("Checking for required schema attributes...");
+
         const hasXmlSchemaInstance = xml.includes('xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"');
         const hasSchemaLocation = xml.includes('xsi:schemaLocation="urn:mpeg:DASH:schema:MPD:2011 DASH-MPD.xsd"');
 
+        logger.log("Has xmlns:xsi attribute:", hasXmlSchemaInstance);
+        logger.log("Has schemaLocation attribute:", hasSchemaLocation);
+
         if (!hasXmlSchemaInstance || !hasSchemaLocation) {
+          logger.log("Adding missing schema attributes to MPD...");
           xml = xml.replace('<MPD', '<MPD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mpeg:DASH:schema:MPD:2011 DASH-MPD.xsd"');
-          console.log("Schema attributes added");
+          logger.log("Schema attributes added");
         } else {
-          console.log("Schema attributes already present");
+          logger.log("Schema attributes already present");
         }
 
-        console.log("MPD XML loaded successfully, final length:", xml.length);
+        logger.log(" MPD XML loaded successfully, final length:", xml.length);
       }
 
       // Load main schema and automatically discover and load dependencies
       async function loadMainSchemaAndDependencies() {
-        console.log("=== Loading main schema and dependencies ===");
+        logger.log("=== Loading main schema and dependencies ===");
+        logger.log("Main XSD URL:", xsdFileUrl);
 
         try {
           // Load main schema
-          console.log("Fetching main schema from:", xsdFileUrl);
+          logger.log("Fetching main schema from:", xsdFileUrl);
           mainSchemaContent = await fetch(xsdFileUrl)
             .then(res => {
-              console.log("Main schema fetch response status:", res.status);
+              logger.log("Main schema fetch response status:", res.status);
               return res.text();
             });
           mainSchemaContent = JSON.parse(JSON.stringify(mainSchemaContent));
+          logger.log("Main schema loaded, content length:", mainSchemaContent.length);
 
           // Find and load all dependencies recursively
-          console.log("Starting recursive dependency loading...");
+          logger.log("Starting recursive dependency loading...");
           await loadDependenciesRecursively(mainSchemaContent, new Set());
 
-          console.log("=== All schemas loaded successfully ===");
-          console.log("Total dependencies loaded:", dependencySchemas.size);
-          console.log("Dependency files:", Array.from(dependencySchemas.keys()));
+          logger.log("=== All schemas loaded successfully ===");
+          logger.log("Total dependencies loaded:", dependencySchemas.size);
+          logger.log("Dependency files:", Array.from(dependencySchemas.keys()));
         } catch (error) {
-          console.error("=== Error loading schemas ===", error);
+          logger.error("=== Error loading schemas ===", error);
           throw error;
         }
       }
@@ -164,26 +169,26 @@
       // Extract dependencies from XSD content and load them recursively
       async function loadDependenciesRecursively(schemaContent, loadedSchemas) {
         const dependencies = extractDependencies(schemaContent);
-        console.log("Dependencies found:", dependencies.length);
+        logger.log("Dependencies found:", dependencies.length);
 
         for (const dependency of dependencies) {
           const downloadUrl = dependency.domain + dependency.fileName;
-          console.log(`Processing dependency: "${downloadUrl}"`);
+          logger.log(`Processing dependency: "${downloadUrl}"`);
 
           if (loadedSchemas.has(downloadUrl)) {
-            console.log(`Skipping already loaded schema: ${downloadUrl}`);
+            logger.log(`Skipping already loaded schema: ${downloadUrl}`);
             continue; // Already loaded
           }
 
           loadedSchemas.add(downloadUrl);
-          console.log(`Added to loaded schemas: ${downloadUrl}`);
+          logger.log(`Added to loaded schemas: ${downloadUrl}`);
 
           try {
-            console.log(`Fetching dependency: ${downloadUrl}`);
+            logger.log(`Fetching dependency: ${downloadUrl}`);
 
             const xsdDependency = await fetch(downloadUrl)
               .then(res => {
-                console.log(`Dependency fetch response status for ${downloadUrl}:`, res.status);
+                logger.log(`Dependency fetch response status for ${downloadUrl}:`, res.status);
                 if (!res.ok) {
                   throw new Error(`HTTP ${res.status}: ${res.statusText}`);
                 }
@@ -191,24 +196,25 @@
               });
             const xsdDependencyString = JSON.parse(JSON.stringify(xsdDependency));
 
-            console.log(`Successfully loaded dependency "${fileName}", content length:`, xsdDependencyString.length);
+            logger.log(`Successfully loaded dependency "${fileName}", content length:`, xsdDependencyString.length);
             dependencySchemas.set(fileName, xsdDependencyString);
 
             // Recursively load dependencies of this dependency
-            console.log(`Recursively checking dependencies for ${fileName}`);
+            logger.log(`Recursively checking dependencies for ${fileName}`);
             await loadDependenciesRecursively(xsdDependencyString, loadedSchemas);
 
           } catch (error) {
-            console.warn(`Failed to load dependency "${fileName}" from ${resolvedUrl}:`, error.message);
+            logger.warn(`Failed to load dependency "${fileName}" from ${resolvedUrl}:`, error.message);
           }
         }
 
-        console.log("--- loadDependenciesRecursively completed ---");
+        logger.log("--- loadDependenciesRecursively completed ---");
       }
 
       // Extract import and include statements from XSD content
       function extractDependencies(schemaContent) {
-        console.log("*** extractDependencies called ***");
+        logger.log("*** extractDependencies called ***");
+        logger.log("Schema content length:", schemaContent.length);
 
         const dependencies = [];
 
@@ -217,20 +223,20 @@
 
         let match;
 
-        console.log("Searching for import statements...");
+        logger.log("Searching for import statements...");
         // Find imports with potential namespace resolution
         while ((match = importRegex.exec(schemaContent)) !== null) {
-          console.log(`Regex match: "${match}"`);
+          logger.log(`Regex match: "${match}"`);
           const namespace = match[1];
           const schemaLocation = match[2];
 
-          console.log(`Found import - namespace: "${namespace}", schemaLocation: "${schemaLocation}"`);
+          logger.log(`Found import - namespace: "${namespace}", schemaLocation: "${schemaLocation}"`);
 
           const includeDependency = {
             domain: namespace,
             fileName: schemaLocation
           };
-          console.log(`Include dependency:`, includeDependency);
+          logger.log(`Include dependency:`, includeDependency);
           dependencies.push(includeDependency);
 
         }
@@ -238,26 +244,26 @@
       }
 
       function validate() {
-        console.log("=== VALIDATION STARTED ===");
+        logger.log("=== VALIDATION STARTED ===");
 
         try {
           const mainSchemaFileName = xsdFileUrl.split('/').pop()
           // 1. write XSD-files into a virtual directory
-          console.log("Writing xsd-schemas to virtual FS:");
+          logger.log("Writing xsd-schemas to virtual FS:");
           Module.FS.writeFile('/' + mainSchemaFileName, mainSchemaContent);
           dependencySchemas.forEach((xsdFile, fileName) => {
-            console.log(`  Writing: /${fileName}`);
+            logger.log(`  Writing: /${fileName}`);
             Module.FS.writeFile('/' + fileName, content);
           });
 
           // 2. write the XML-string to memory
-          console.log("Allocating memory for XML content...");
+          logger.log("Allocating memory for XML content...");
           const ptrXml = Module._malloc(lengthBytesUTF8(xml) + 1);
           stringToUTF8(xml, Module.HEAPU8, ptrXml, lengthBytesUTF8(xml) + 1);
-          console.log("XML written to memory at pointer:", ptrXml);
+          logger.log("XML written to memory at pointer:", ptrXml);
 
           // 3. parse XML-document
-          console.log("Parsing XML document...");
+          logger.log("Parsing XML document...");
           const xmlDoc = Module.ccall(
             'xmlReadMemory',
             'number',
@@ -266,23 +272,23 @@
           );
 
           // 4. load scheme from file DASH-MPD.xsd (that imports work)
-          console.log(`Creating schema parser context for: /${mainSchemaFileName}`);
+          logger.log(`Creating schema parser context for: /${mainSchemaFileName}`);
           const schemaParserCtx = Module.ccall(
             'xmlSchemaNewParserCtxt',
             'number',
             ['string'],
             ['/' + mainSchemaFileName]
           );
-          console.log("Schema parser context created:", schemaParserCtx);
+          logger.log("Schema parser context created:", schemaParserCtx);
 
           // 5. parse schema and create validation context
           const schema = Module.ccall('xmlSchemaParse', 'number', ['number'], [schemaParserCtx]);
-          console.log("Schema parsed, pointer:", schema);
+          logger.log("Schema parsed, pointer:", schema);
           const validCtx = Module.ccall('xmlSchemaNewValidCtxt', 'number', ['number'], [schema]);
-          console.log("Validation context created:", validCtx);
+          logger.log("Validation context created:", validCtx);
 
           // 6. validate XML
-          console.log("Validating XML document against schema...");
+          logger.log("Validating XML document against schema...");
           const result = Module.ccall(
             'xmlSchemaValidateDoc',
             'number',
@@ -291,31 +297,31 @@
           );
 
           // 7. release memory
-          console.log("Cleaning up memory...");
+          logger.log("Cleaning up memory...");
           Module.ccall('xmlFreeDoc', 'void', ['number'], [xmlDoc]);
           Module.ccall('xmlSchemaFreeValidCtxt', 'void', ['number'], [validCtx]);
           Module.ccall('xmlSchemaFree', 'void', ['number'], [schema]);
           Module.ccall('xmlSchemaFreeParserCtxt', 'void', ['number'], [schemaParserCtx]);
           Module._free(ptrXml);
 
-          console.log("=== VALIDATION RESULT ===");
-          console.log("Raw validation result:", result);
-          console.log("Validation success:", result === 0);
+          logger.log("=== VALIDATION RESULT ===");
+          logger.log("Raw validation result:", result);
+          logger.log("Validation success:", result === 0);
 
           // 8. return result
           const isValid = result === 0;
-          console.log("=== VALIDATION FINISHED ===");
+          logger.log("=== VALIDATION FINISHED ===");
           return isValid;
 
         } catch (error) {
-          console.error("=== VALIDATION ERROR ===", error);
-          console.error("Error stack:", error.stack);
+          logger.error("=== VALIDATION ERROR ===", error);
+          logger.error("Error stack:", error.stack);
           return false;
         }
       }
 
       function stringToUTF8(str, heap, offset, maxBytesToWrite) {
-        console.log("In function stringToUTF8");
+        logger.log("In function stringToUTF8");
         if (!(maxBytesToWrite > 0)) return 0;
         const utf8encoder = new TextEncoder();
         const encoded = utf8encoder.encode(str);
