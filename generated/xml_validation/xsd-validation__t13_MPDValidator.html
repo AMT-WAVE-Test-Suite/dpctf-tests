@@ -145,28 +145,30 @@
         const dependencies = extractDependencies(schemaContent);
 
         for (const dependency of dependencies) {
-          if (loadedSchemas.has(dependency)) {
+          const resolvedUrl = dependency.resolvedUrl;
+          const fileName = dependency.fileName;
+
+          if (loadedSchemas.has(resolvedUrl)) {
             continue; // Already loaded
           }
 
-          loadedSchemas.add(dependency);
+          loadedSchemas.add(resolvedUrl);
 
           try {
-            const dependencyUrl = resolveUrl(dependency, baseUrl);
-            console.log(`Loading dependency: ${dependencyUrl}`);
+            console.log(`Loading dependency: ${resolvedUrl}`);
 
-            const dependencyContent = await fetch(dependencyUrl)
+            const dependencyContent = await fetch(resolvedUrl)
               .then(res => res.text());
             const cleanContent = JSON.parse(JSON.stringify(dependencyContent));
 
-            dependencySchemas.set(dependency, cleanContent);
+            dependencySchemas.set(fileName, cleanContent);
 
             // Recursively load dependencies of this dependency
-            const depBaseUrl = getBaseUrl(dependencyUrl);
+            const depBaseUrl = getBaseUrl(resolvedUrl);
             await loadDependenciesRecursively(cleanContent, depBaseUrl, loadedSchemas);
 
           } catch (error) {
-            console.warn(`Could not load dependency ${dependency}:`, error);
+            console.warn(`Could not load dependency ${resolvedUrl}:`, error);
           }
         }
       }
@@ -175,36 +177,61 @@
       function extractDependencies(schemaContent) {
         const dependencies = [];
 
-        // Regular expressions to find import and include statements
-        const importRegex = /<xs:import[^>]*schemaLocation\s*=\s*["']([^"']+)["'][^>]*>/gi;
-        const includeRegex = /<xs:include[^>]*schemaLocation\s*=\s*["']([^"']+)["'][^>]*>/gi;
+        // Combined regex to capture both namespace and schemaLocation
+        const importRegex = /<(?:xs:)?import[^>]*(?:namespace\s*=\s*["']([^"']+)["'][^>]*)?(?:schemaLocation\s*=\s*["']([^"']+)["'][^>]*)?[^>]*>/gi;
+        const includeRegex = /<(?:xs:)?include[^>]*schemaLocation\s*=\s*["']([^"']+)["'][^>]*>/gi;
 
         let match;
 
-        // Find imports
+        // Find imports with potential namespace resolution
         while ((match = importRegex.exec(schemaContent)) !== null) {
-          dependencies.push(match[1]);
+          const namespace = match[1];
+          const schemaLocation = match[2];
+
+          if (schemaLocation) {
+            const resolvedDependency = resolveDependencyUrl(namespace, schemaLocation);
+            dependencies.push(resolvedDependency);
+          }
         }
 
-        // Find includes
+        // Find includes (no namespace resolution needed)
         while ((match = includeRegex.exec(schemaContent)) !== null) {
-          dependencies.push(match[1]);
-        }
-
-        // Also check for schema without xs prefix
-        const importRegex2 = /<import[^>]*schemaLocation\s*=\s*["']([^"']+)["'][^>]*>/gi;
-        const includeRegex2 = /<include[^>]*schemaLocation\s*=\s*["']([^"']+)["'][^>]*>/gi;
-
-        while ((match = importRegex2.exec(schemaContent)) !== null) {
-          dependencies.push(match[1]);
-        }
-
-        while ((match = includeRegex2.exec(schemaContent)) !== null) {
-          dependencies.push(match[1]);
+          const schemaLocation = match[1];
+          dependencies.push({
+            resolvedUrl: schemaLocation,
+            fileName: schemaLocation
+          });
         }
 
         console.log("Found dependencies:", dependencies);
         return dependencies;
+      }
+
+      // Resolve dependency URL based on namespace and schemaLocation
+      function resolveDependencyUrl(namespace, schemaLocation) {
+        // If schemaLocation is already absolute, use it as-is
+        if (schemaLocation.startsWith('http://') || schemaLocation.startsWith('https://')) {
+          return {
+            resolvedUrl: schemaLocation,
+            fileName: getFileNameFromUrl(schemaLocation)
+          };
+        }
+
+        let resolvedUrl = schemaLocation;
+
+        // If namespace exists and schemaLocation is relative, construct URL from namespace
+        if (namespace && !schemaLocation.startsWith('/')) {
+          // Remove trailing slash from namespace if present
+          const baseNamespace = namespace.endsWith('/') ? namespace.slice(0, -1) : namespace;
+
+          // Construct full URL by combining namespace with schemaLocation
+          resolvedUrl = baseNamespace + '/' + schemaLocation;
+        }
+
+        return {
+          resolvedUrl: resolvedUrl,
+          fileName: schemaLocation // Keep original filename for file system
+        };
       }
 
       // Get base URL from a full URL
@@ -213,7 +240,7 @@
         return lastSlashIndex >= 0 ? url.substring(0, lastSlashIndex + 1) : '';
       }
 
-      // Resolve relative URL against base URL
+      // Resolve relative URL against base URL (fallback for non-namespace cases)
       function resolveUrl(relativeUrl, baseUrl) {
         if (relativeUrl.startsWith('http://') || relativeUrl.startsWith('https://')) {
           return relativeUrl; // Already absolute
