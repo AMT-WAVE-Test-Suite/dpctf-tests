@@ -73,13 +73,13 @@
       initializeSchemas();
 
       async function initializeSchemas() {
-        console.log("🚀 INITIALIZATION STARTED 🚀");
+        console.log("INITIALIZATION STARTED");
         try {
           await getXml();
           await loadMainSchemaAndDependencies();
-          console.log("✅ INITIALIZATION COMPLETED SUCCESSFULLY ✅");
+          console.log("INITIALIZATION COMPLETED SUCCESSFULLY ");
         } catch (error) {
-          console.error("❌ INITIALIZATION FAILED ❌", error);
+          console.error("INITIALIZATION FAILED ", error);
         }
       }
 
@@ -110,7 +110,7 @@
 
       // Save MPD file as utf-8 string
       async function getXml() {
-        console.log("📄 Loading MPD XML file...");
+        console.log(" Loading MPD XML file...");
         console.log("MPD URL:", videoContentModel[0]);
 
         xml = await fetch(videoContentModel[0])
@@ -137,7 +137,7 @@
           console.log("Schema attributes already present");
         }
 
-        console.log("📄 MPD XML loaded successfully, final length:", xml.length);
+        console.log(" MPD XML loaded successfully, final length:", xml.length);
       }
 
       // Load main schema and automatically discover and load dependencies

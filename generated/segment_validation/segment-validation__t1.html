@@ -63,13 +63,16 @@
         usePlayout: false,
       });
 
-      function executeTest(player, done, parameters) {
+      async function executeTest(player, done, parameters) {
         var minBufferDuration = parameters.minBufferDuration / 1000;
         player.startBuffering();
 
-        let mpd;
-        getMPD();
-
+        // save MPD file as utf-8 string
+        let mpd = await fetch(videoContentModel[0])
+        .then(res => res.text());
+        mpd = JSON.parse( JSON.stringify( mpd ) );
+        log("MPD successfully loaded");
+        
         let baseUrl = videoContentModel[0].split("/").filter(e => !e.includes(".mpd")).join("/") + "/";
         let segmentList = mpdParser.parse(mpd);
         // adjust extracted uris that they can be requested
@@ -88,6 +91,7 @@
             .then(res => {
                 if (String(res.status).startsWith("4") || String(res.status).startsWith("5")) {
                   console.log("Segment not exist!");
+                  log("Segment not exist!");
                   testPass = false;
                 } else {
                   console.log("Segment exist");
@@ -115,13 +119,6 @@
         }, "Segment duration correct");
         
         player.playOnBufferLoaded(minBufferDuration).then(done);
-      }
-
-      // save MPD file as utf-8 string
-      async function getMPD() {
-        mpd = await fetch(videoContentModel[0])
-        .then(res => res.text());
-        mpd = JSON.parse( JSON.stringify( mpd ) );
       }
     </script>
   </body>
