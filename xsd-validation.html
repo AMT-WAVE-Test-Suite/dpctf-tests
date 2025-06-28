@@ -204,7 +204,7 @@
             await loadDependenciesRecursively(xsdDependencyString, loadedSchemas);
 
           } catch (error) {
-            logger.warn(`Failed to load dependency "${fileName}" from ${resolvedUrl}:`, error.message);
+            logger.warn(`Failed to load dependency "${fileName}" from ${downloadUrl}:`, error.message);
           }
         }
 
@@ -247,11 +247,12 @@
         logger.log("=== VALIDATION STARTED ===");
 
         try {
-          const mainSchemaFileName = xsdFileUrl.split('/').pop()
+          const mainSchemaFileName = xsdFileUrl.split('/').pop();
+
           // 1. write XSD-files into a virtual directory
           logger.log("Writing xsd-schemas to virtual FS:");
           Module.FS.writeFile('/' + mainSchemaFileName, mainSchemaContent);
-          dependencySchemas.forEach((xsdFile, fileName) => {
+          dependencySchemas.forEach((content, fileName) => {
             logger.log(`  Writing: /${fileName}`);
             Module.FS.writeFile('/' + fileName, content);
           });
