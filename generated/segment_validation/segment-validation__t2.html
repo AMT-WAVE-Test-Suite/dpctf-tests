@@ -123,31 +123,31 @@
           var REDIRECT_TIME = match ? match[1] : null;
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
 
-          console.log("Before startAnalyzing");
           let resultArr = await startAnalyzing();
-          console.log("resultArr ", resultArr);
           if (resultArr.some(results => results == false)) {
             assert_true(false);
           } else {
             assert_true(true);
           }
           test.done();
+          done();
         }, "Segment duration correct");
 
         async function startAnalyzing() {
+          // Fetch the init file
           let initUrl = segmentUri[0].split("/").filter(e => !e.includes('.m4s')).join('/') + "/init.mp4";
           let init = await fetch(initUrl)
           .then(res => res.arrayBuffer());
 
+          // Analyze every segment parallel
           let results = [];
           for (let i = 0; i < segmentUri.length; i++) {
               results.push(
                 fetch(segmentUri[i])
                 .then(res => res.arrayBuffer())
-                .then(segment => segmentAnalyzer.analyzeSegment(init, segment, segmentDuration[i]))
+                .then(segment => segmentAnalyzer.analyzeSegment(init, segment, segmentDuration[i], logger))
             );               
           }
-          console.log("results ", results);
           return await Promise.all(results).then(res => res.flat());
         }
         
