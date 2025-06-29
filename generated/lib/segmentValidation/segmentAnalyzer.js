@@ -7,7 +7,7 @@ import * as MP4Box from './mp4box.all.js';
     ? define(["exports", "global/window", "xmldom"], factory)
     : ((global = global || self),
       factory((global.segmentAnalyzer = {}), global.window, global.window));
-})(this, function (exports, window$2, xmldom) {
+})(this, function (exports) {
 
     var analyzeSegment = async function analyzeSegment (init, segment, expectedDuration) {
         
@@ -20,7 +20,7 @@ import * as MP4Box from './mp4box.all.js';
         
         var results = [];
 
-        let resultFinished = new Promise((resolve, reject) => {
+        let resultFinished = new Promise((resolve) => {
             mp4boxfile.onReady = function (info) {
                 for (const track of info.tracks) {
                     mp4boxfile.setExtractionOptions(track.id, null, { nbSamples: Infinity });

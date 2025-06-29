@@ -34,7 +34,7 @@
     <script src="../lib/davidshimjs/qrcode.js"></script>
     <script src="../lib/dpctf-testharness.js"></script>
     <script src="../lib/hbbtv.js"></script>
-    <script type="module" src="../lib/segmentAnalyzer.js"></script>
+    <script src="../lib/segmentValidation/segmentAnalyzer.js" type="module"></script>
     <script>
       
       // Global variables
@@ -116,7 +116,6 @@
 
         }, "Segment exist on Server");
 
-
         dpctfTest.asyncTest(function (test) {
           var query = location.search.replace(/\?/, "");
           var match = query.match(/redirect_time=([^&]+)/);
@@ -133,7 +132,6 @@
           test.done();
         }, "Segment duration correct");
 
-        // MPD Datei die Validiert werden soll
         async function startAnalyzing() {
           let initUrl = segmentUri[0].split("/").filter(e => !e.includes('.m4s')).join('/') + "/init.mp4";
           let init = await fetch(initUrl)
