@@ -145,7 +145,7 @@
               results.push(
                 fetch(segmentUri[i])
                 .then(res => res.arrayBuffer())
-                .then(segment => segmentAnalyzer.analyzeSegment(init, segment, segmentDuration[i], logger))
+                .then(segment => segmentAnalyzer.analyzeSegment(init, segment, segmentDuration[i], logger, i))
             );               
           }
           return await Promise.all(results).then(res => res.flat());

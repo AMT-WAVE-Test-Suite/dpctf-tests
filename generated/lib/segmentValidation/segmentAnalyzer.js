@@ -7,7 +7,7 @@
       factory((global.segmentAnalyzer = {}), global.window, global.window));
 })(this, function (exports) {
 
-    var analyzeSegment = async function analyzeSegment (init, segment, expectedDuration, logger) {
+    var analyzeSegment = async function analyzeSegment (init, segment, expectedDuration, logger, i) {
         
         // set start of the segment behind the init
         init.fileStart = 0;
@@ -36,7 +36,7 @@
                         let durationUnits = samples.reduce((acc, cur) => acc + cur.duration, 0);
                         let durationSeconds = durationUnits / track.timescale;
 
-                        logger.log(`Segment ${track.id}: Expected duration (MPD): ${expectedDuration} - Segment duration: ${durationSeconds}`);
+                        logger.log(`Segment ${i}: Expected duration (MPD): ${expectedDuration} - Segment duration: ${durationSeconds}`);
 
                         if (expectedDuration == durationSeconds) {
                             logger.log(`Segment ${track.id} duration correct`);
