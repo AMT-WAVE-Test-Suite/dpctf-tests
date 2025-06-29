@@ -117,14 +117,15 @@
 
         }, "Segment exist on Server");
 
-        dpctfTest.asyncTest(function (test) {
+        dpctfTest.asyncTest(async function (test) {
           var query = location.search.replace(/\?/, "");
           var match = query.match(/redirect_time=([^&]+)/);
           var REDIRECT_TIME = match ? match[1] : null;
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
 
-          let resultArr = startAnalyzing();
-          console.log(resultArr);
+          console.log("Before startAnalyzing");
+          let resultArr = await startAnalyzing();
+          console.log("resultArr ", resultArr);
           if (resultArr.some(results => results == false)) {
             assert_true(false);
           } else {
@@ -146,8 +147,8 @@
                 .then(segment => segmentAnalyzer.analyzeSegment(init, segment, segmentDuration[i]))
             );               
           }
-          console.log(results);
-          return Promise.all(results).then(res => res.flat());
+          console.log("results ", results);
+          return await Promise.all(results).then(res => res.flat());
         }
         
         player.playOnBufferLoaded(minBufferDuration).then(done);

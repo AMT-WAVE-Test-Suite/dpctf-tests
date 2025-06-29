@@ -47,6 +47,7 @@
                             results.push(false);
                         }
                         if (track.id == info.tracks.length) {
+                            console.log("resolve called");
                             resolve();
                         }
                     }
