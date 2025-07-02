@@ -69,6 +69,421 @@
       var mainSchemaContent;
       var dependencySchemas = new Map(); // Store all dependency schemas
 
+      const INLINE = {
+        'http://www.w3.org/1999/xlink.xsd': `<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.w3.org/1999/xlink" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+ <xs:annotation>
+  <xs:documentation>This schema is not normative, or even definitive.  The
+prose copy in the XLink 1.1 recommendation (http://www.w3.org/TR/xlink11/) is
+definitive, although it should not differ from this file, except for the
+absence of these two initial comments.</xs:documentation>
+ </xs:annotation>
+
+ <xs:annotation>
+  <xs:documentation>In keeping with the W3C's standard versioning
+   policy, this schema document will persist at
+   http://www.w3.org/XML/2008/06/xlink.xsd.
+   At the date of issue it can also be found at
+   http://www.w3.org/1999/xlink.xsd.
+   The schema document at that URI may however change in the future,
+   in order to remain compatible with the latest version of XML Schema
+   itself, or with the XLink namespace itself.  In other words, if the XML
+   Schema or XLink namespaces change, the version of this document at
+   http://www.w3.org/1999/xlink.xsd will change
+   accordingly; the version at
+   http://www.w3.org/2008/06/xlink.xsd will not change.
+</xs:documentation>
+ </xs:annotation>
+
+ <xs:annotation>
+  <xs:documentation>This schema document provides attribute declarations and
+attribute group, complex type and simple type definitions which can be used in
+the construction of user schemas to define the structure of particular linking
+constructs, e.g.
+<![CDATA[
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:xl="http://www.w3.org/1999/xlink">
+
+ <xs:import namespace="http://www.w3.org/1999/xlink"
+            location="http://www.w3.org/1999/xlink.xsd">
+
+ <xs:element name="mySimple">
+  <xs:complexType>
+   ...
+   <xs:attributeGroup ref="xl:simpleAttrs"/>
+   ...
+  </xs:complexType>
+ </xs:element>
+ ...
+</xs:schema>]]></xs:documentation>
+ </xs:annotation>
+
+ <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+
+ <xs:attribute name="type" type="xlink:typeType"/>
+
+ <xs:simpleType name="typeType">
+  <xs:restriction base="xs:token">
+   <xs:enumeration value="simple"/>
+   <xs:enumeration value="extended"/>
+   <xs:enumeration value="title"/>
+   <xs:enumeration value="resource"/>
+   <xs:enumeration value="locator"/>
+   <xs:enumeration value="arc"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:attribute name="href" type="xlink:hrefType"/>
+
+ <xs:simpleType name="hrefType">
+  <xs:restriction base="xs:anyURI"/>
+ </xs:simpleType>
+
+ <xs:attribute name="role" type="xlink:roleType"/>
+
+ <xs:simpleType name="roleType">
+  <xs:restriction base="xs:anyURI">
+   <xs:minLength value="1"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:attribute name="arcrole" type="xlink:arcroleType"/>
+
+ <xs:simpleType name="arcroleType">
+  <xs:restriction base="xs:anyURI">
+   <xs:minLength value="1"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:attribute name="title" type="xlink:titleAttrType"/>
+
+ <xs:simpleType name="titleAttrType">
+  <xs:restriction base="xs:string"/>
+ </xs:simpleType>
+
+ <xs:attribute name="show" type="xlink:showType"/>
+
+ <xs:simpleType name="showType">
+  <xs:restriction base="xs:token">
+   <xs:enumeration value="new"/>
+   <xs:enumeration value="replace"/>
+   <xs:enumeration value="embed"/>
+   <xs:enumeration value="other"/>
+   <xs:enumeration value="none"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:attribute name="actuate" type="xlink:actuateType"/>
+
+ <xs:simpleType name="actuateType">
+  <xs:restriction base="xs:token">
+   <xs:enumeration value="onLoad"/>
+   <xs:enumeration value="onRequest"/>
+   <xs:enumeration value="other"/>
+   <xs:enumeration value="none"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:attribute name="label" type="xlink:labelType"/>
+
+ <xs:simpleType name="labelType">
+  <xs:restriction base="xs:NCName"/>
+ </xs:simpleType>
+
+ <xs:attribute name="from" type="xlink:fromType"/>
+
+ <xs:simpleType name="fromType">
+  <xs:restriction base="xs:NCName"/>
+ </xs:simpleType>
+
+ <xs:attribute name="to" type="xlink:toType"/>
+
+ <xs:simpleType name="toType">
+  <xs:restriction base="xs:NCName"/>
+ </xs:simpleType>
+
+ <xs:attributeGroup name="simpleAttrs">
+  <xs:attribute ref="xlink:type" fixed="simple"/>
+  <xs:attribute ref="xlink:href"/>
+  <xs:attribute ref="xlink:role"/>
+  <xs:attribute ref="xlink:arcrole"/>
+  <xs:attribute ref="xlink:title"/>
+  <xs:attribute ref="xlink:show"/>
+  <xs:attribute ref="xlink:actuate"/>
+ </xs:attributeGroup>
+
+ <xs:group name="simpleModel">
+  <xs:sequence>
+   <xs:any processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:group>
+
+ <xs:complexType mixed="true" name="simple">
+  <xs:annotation>
+   <xs:documentation>
+    Intended for use as the type of user-declared elements to make them
+    simple links.
+   </xs:documentation>
+  </xs:annotation>
+  <xs:group ref="xlink:simpleModel"/>
+  <xs:attributeGroup ref="xlink:simpleAttrs"/>
+ </xs:complexType>
+
+ <xs:attributeGroup name="extendedAttrs">
+  <xs:attribute ref="xlink:type" fixed="extended" use="required"/>
+  <xs:attribute ref="xlink:role"/>
+  <xs:attribute ref="xlink:title"/>
+ </xs:attributeGroup>
+
+ <xs:group name="extendedModel">
+   <xs:choice>
+    <xs:element ref="xlink:title"/>
+    <xs:element ref="xlink:resource"/>
+    <xs:element ref="xlink:locator"/>
+    <xs:element ref="xlink:arc"/>
+  </xs:choice>
+ </xs:group>
+
+ <xs:complexType name="extended">
+  <xs:annotation>
+   <xs:documentation>
+    Intended for use as the type of user-declared elements to make them
+    extended links.
+    Note that the elements referenced in the content model are all abstract.
+    The intention is that by simply declaring elements with these as their
+    substitutionGroup, all the right things will happen.
+   </xs:documentation>
+  </xs:annotation>
+  <xs:group ref="xlink:extendedModel" minOccurs="0" maxOccurs="unbounded"/>
+  <xs:attributeGroup ref="xlink:extendedAttrs"/>
+ </xs:complexType>
+
+ <xs:element name="title" type="xlink:titleEltType" abstract="true"/>
+
+ <xs:attributeGroup name="titleAttrs">
+  <xs:attribute ref="xlink:type" fixed="title" use="required"/>
+  <xs:attribute ref="xml:lang">
+   <xs:annotation>
+    <xs:documentation>
+     xml:lang is not required, but provides much of the
+     motivation for title elements in addition to attributes, and so
+     is provided here for convenience.
+    </xs:documentation>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:attributeGroup>
+
+ <xs:group name="titleModel">
+  <xs:sequence>
+   <xs:any processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:group>
+
+ <xs:complexType mixed="true" name="titleEltType">
+  <xs:group ref="xlink:titleModel"/>
+  <xs:attributeGroup ref="xlink:titleAttrs"/>
+ </xs:complexType>
+
+ <xs:element name="resource" type="xlink:resourceType" abstract="true"/>
+
+ <xs:attributeGroup name="resourceAttrs">
+  <xs:attribute ref="xlink:type" fixed="resource" use="required"/>
+  <xs:attribute ref="xlink:role"/>
+  <xs:attribute ref="xlink:title"/>
+  <xs:attribute ref="xlink:label"/>
+ </xs:attributeGroup>
+
+ <xs:group name="resourceModel">
+  <xs:sequence>
+   <xs:any processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:group>
+
+ <xs:complexType mixed="true" name="resourceType">
+  <xs:group ref="xlink:resourceModel"/>
+  <xs:attributeGroup ref="xlink:resourceAttrs"/>
+ </xs:complexType>
+
+ <xs:element name="locator" type="xlink:locatorType" abstract="true"/>
+
+ <xs:attributeGroup name="locatorAttrs">
+  <xs:attribute ref="xlink:type" fixed="locator" use="required"/>
+  <xs:attribute ref="xlink:href" use="required"/>
+  <xs:attribute ref="xlink:role"/>
+  <xs:attribute ref="xlink:title"/>
+  <xs:attribute ref="xlink:label">
+   <xs:annotation>
+    <xs:documentation>
+     label is not required, but locators have no particular
+     XLink function if they are not labeled.
+    </xs:documentation>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:attributeGroup>
+
+ <xs:group name="locatorModel">
+  <xs:sequence>
+   <xs:element ref="xlink:title" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:group>
+
+ <xs:complexType name="locatorType">
+  <xs:group ref="xlink:locatorModel"/>
+  <xs:attributeGroup ref="xlink:locatorAttrs"/>
+ </xs:complexType>
+
+ <xs:element name="arc" type="xlink:arcType" abstract="true"/>
+
+ <xs:attributeGroup name="arcAttrs">
+  <xs:attribute ref="xlink:type" fixed="arc" use="required"/>
+  <xs:attribute ref="xlink:arcrole"/>
+  <xs:attribute ref="xlink:title"/>
+  <xs:attribute ref="xlink:show"/>
+  <xs:attribute ref="xlink:actuate"/>
+  <xs:attribute ref="xlink:from"/>
+  <xs:attribute ref="xlink:to">
+   <xs:annotation>
+    <xs:documentation>
+     from and to have default behavior when values are missing
+    </xs:documentation>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:attributeGroup>
+
+ <xs:group name="arcModel">
+  <xs:sequence>
+   <xs:element ref="xlink:title" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:group>
+
+ <xs:complexType name="arcType">
+  <xs:group ref="xlink:arcModel"/>
+  <xs:attributeGroup ref="xlink:arcAttrs"/>
+ </xs:complexType>
+
+</xs:schema>
+`,
+        'http://www.w3.org/XML/1998/xml.xsd'  : `<?xml version='1.0'?>
+<!DOCTYPE xs:schema PUBLIC "-//W3C//DTD XMLSCHEMA 200102//EN" "XMLSchema.dtd" >
+<xs:schema targetNamespace="http://www.w3.org/XML/1998/namespace" xmlns:xs="http://www.w3.org/2001/XMLSchema" xml:lang="en">
+
+ <xs:annotation>
+  <xs:documentation>
+   See http://www.w3.org/XML/1998/namespace.html and
+   http://www.w3.org/TR/REC-xml for information about this namespace.
+
+    This schema document describes the XML namespace, in a form
+    suitable for import by other schema documents.
+
+    Note that local names in this namespace are intended to be defined
+    only by the World Wide Web Consortium or its subgroups.  The
+    following names are currently defined in this namespace and should
+    not be used with conflicting semantics by any Working Group,
+    specification, or document instance:
+
+    base (as an attribute name): denotes an attribute whose value
+         provides a URI to be used as the base for interpreting any
+         relative URIs in the scope of the element on which it
+         appears; its value is inherited.  This name is reserved
+         by virtue of its definition in the XML Base specification.
+
+    lang (as an attribute name): denotes an attribute whose value
+         is a language code for the natural language of the content of
+         any element; its value is inherited.  This name is reserved
+         by virtue of its definition in the XML specification.
+
+    space (as an attribute name): denotes an attribute whose
+         value is a keyword indicating what whitespace processing
+         discipline is intended for the content of the element; its
+         value is inherited.  This name is reserved by virtue of its
+         definition in the XML specification.
+
+    Father (in any context at all): denotes Jon Bosak, the chair of
+         the original XML Working Group.  This name is reserved by
+         the following decision of the W3C XML Plenary and
+         XML Coordination groups:
+
+             In appreciation for his vision, leadership and dedication
+             the W3C XML Plenary on this 10th day of February, 2000
+             reserves for Jon Bosak in perpetuity the XML name
+             xml:Father
+  </xs:documentation>
+ </xs:annotation>
+
+ <xs:annotation>
+  <xs:documentation>This schema defines attributes and an attribute group
+        suitable for use by
+        schemas wishing to allow xml:base, xml:lang or xml:space attributes
+        on elements they define.
+
+        To enable this, such a schema must import this schema
+        for the XML namespace, e.g. as follows:
+        &lt;schema . . .>
+         . . .
+         &lt;import namespace="http://www.w3.org/XML/1998/namespace"
+                    schemaLocation="http://www.w3.org/2001/03/xml.xsd"/>
+
+        Subsequently, qualified reference to any of the attributes
+        or the group defined below will have the desired effect, e.g.
+
+        &lt;type . . .>
+         . . .
+         &lt;attributeGroup ref="xml:specialAttrs"/>
+
+         will define a type which will schema-validate an instance
+         element with any of those attributes</xs:documentation>
+ </xs:annotation>
+
+ <xs:annotation>
+  <xs:documentation>In keeping with the XML Schema WG's standard versioning
+   policy, this schema document will persist at
+   http://www.w3.org/2001/03/xml.xsd.
+   At the date of issue it can also be found at
+   http://www.w3.org/2001/xml.xsd.
+   The schema document at that URI may however change in the future,
+   in order to remain compatible with the latest version of XML Schema
+   itself.  In other words, if the XML Schema namespace changes, the version
+   of this document at
+   http://www.w3.org/2001/xml.xsd will change
+   accordingly; the version at
+   http://www.w3.org/2001/03/xml.xsd will not change.
+  </xs:documentation>
+ </xs:annotation>
+
+ <xs:attribute name="lang" type="xs:language">
+  <xs:annotation>
+   <xs:documentation>In due course, we should install the relevant ISO 2- and 3-letter
+         codes as the enumerated possible values . . .</xs:documentation>
+  </xs:annotation>
+ </xs:attribute>
+
+ <xs:attribute name="space" default="preserve">
+  <xs:simpleType>
+   <xs:restriction base="xs:NCName">
+    <xs:enumeration value="default"/>
+    <xs:enumeration value="preserve"/>
+   </xs:restriction>
+  </xs:simpleType>
+ </xs:attribute>
+
+ <xs:attribute name="base" type="xs:anyURI">
+  <xs:annotation>
+   <xs:documentation>See http://www.w3.org/TR/xmlbase/ for
+                     information about this attribute.</xs:documentation>
+  </xs:annotation>
+ </xs:attribute>
+
+ <xs:attributeGroup name="specialAttrs">
+  <xs:attribute ref="xml:base"/>
+  <xs:attribute ref="xml:lang"/>
+  <xs:attribute ref="xml:space"/>
+ </xs:attributeGroup>
+
+</xs:schema>
+`
+      };
+
       // Initialize the loading process
       initializeSchemas();
 
@@ -184,27 +599,37 @@
           logger.log(`Added to loaded schemas: ${downloadUrl}`);
 
           try {
-            logger.log(`Fetching dependency: ${downloadUrl}`);
+            // logger.log(`Fetching dependency: ${downloadUrl}`);
+            let xsdDependency;
+            if (INLINE[downloadUrl]) {
+              // (1) INLINE shortcut
+              logger.log(`Using inline copy of ${downloadUrl}`);
+              xsdDependency = INLINE[downloadUrl];
 
-            const xsdDependency = await fetch(downloadUrl)
-              .then(res => {
-                logger.log(`Dependency fetch response status for ${downloadUrl}:`, res.status);
-                if (!res.ok) {
-                  throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-                }
-                return res.text();
-              });
+            } else {
+              // (2) normal network fetch
+              logger.log(`Fetching dependency: ${downloadUrl}`);
+              xsdDependency = await fetch(downloadUrl)
+                  .then(res => {
+                    logger.log(`Dependency fetch response status for ${downloadUrl}:`, res.status);
+                    if (!res.ok) {
+                      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                    }
+                    return res.text();
+                  });
+            }
             const xsdDependencyString = JSON.parse(JSON.stringify(xsdDependency));
 
-            logger.log(`Successfully loaded dependency "${fileName}", content length:`, xsdDependencyString.length);
-            dependencySchemas.set(fileName, xsdDependencyString);
+
+            logger.log(`Successfully loaded dependency "${dependency.fileName}", content length:`, xsdDependencyString.length);
+            dependencySchemas.set(dependency.fileName, xsdDependencyString);
 
             // Recursively load dependencies of this dependency
-            logger.log(`Recursively checking dependencies for ${fileName}`);
+            logger.log(`Recursively checking dependencies for ${dependency.fileName}`);
             await loadDependenciesRecursively(xsdDependencyString, loadedSchemas);
 
           } catch (error) {
-            logger.warn(`Failed to load dependency "${fileName}" from ${downloadUrl}:`, error.message);
+            logger.warn(`Failed to load dependency "${dependency.fileName}" from ${downloadUrl}:`, error.message);
           }
         }
 
