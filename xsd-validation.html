@@ -94,14 +94,13 @@
 
       // Save MPD file as utf-8 string
       function getMPD() {
-        let mpd;
         logger.log("Loading MPD XML file...");
         logger.log("MPD URL:", videoContentModel[0]);
 
-        mpd = fetch(videoContentModel[0])
+        return fetch(videoContentModel[0])
         .then(res => res.text())
-        .then(data => JSON.parse( JSON.stringify( mpd ) ))
-        .then(data => {
+        .then(mpd => JSON.parse(JSON.stringify(mpd)))
+        .then(mpd => {
           logger.log("Original MPD length:", mpd.length);
           logger.log("Checking for required schema attributes...");
 
@@ -119,9 +118,7 @@
             logger.log("Schema attributes already present");
           }
           logger.log(" MPD XML loaded successfully, final length:", mpd.length);
-        })
-
-        return mpd;
+        });
       }
 
       // Load main schema and dependencies
@@ -138,113 +135,27 @@
             .then(res => {
               logger.log("Main schema fetch response status:", res.status);
               return res.text();
+            })
+            .then(data => {
+              logger.log("Main schema loaded, content length:", data.length);
+              return JSON.parse(JSON.stringify(data))
             });
-          mainSchemaContent = JSON.parse(JSON.stringify(mainSchemaContent));
-          logger.log("Main schema loaded, content length:", mainSchemaContent.length);
 
           // Load all static dependencies
           logger.log("Starting dependency loading...");
 
-          schemes[1] = fetch("../lib/xsdValidation/xlink.xsd").then(res => res.text())
-          schemes[2] = fetch("../lib/xsdValidation/xml.xsd").then(res => res.text())
+          schemes[1] = fetch("../lib/xsdValidation/xlink.xsd")
+            .then(res => res.text())
+            .then(data => JSON.parse(JSON.stringify(data)));
+          schemes[2] = fetch("../lib/xsdValidation/xml.xsd")
+            .then(res => res.text())
+            .then(data => JSON.parse(JSON.stringify(data)));
 
-          logger.log("=== All schemas loaded successfully ===");
-          logger.log("Total dependencies loaded:", dependencySchemas.size);
-          logger.log("Dependency files:", Array.from(dependencySchemas.keys()));
         } catch (error) {
           console.error("=== Error loading schemas ===", error);
         }
         return schemes;
       }
-
-      /* function validate() {
-        logger.log("=== VALIDATION STARTED ===");
-
-        try {
-          const mainSchemaFileName = xsdFileUrl.split('/').pop();
-
-          // 1. write XSD-files into a virtual directory
-          logger.log("Writing xsd-schemas to virtual FS:");
-          Module.FS.writeFile('/' + mainSchemaFileName, mainSchemaContent);
-          dependencySchemas.forEach((content, fileName) => {
-            logger.log(`  Writing: /${fileName}`);
-            Module.FS.writeFile('/' + fileName, content);
-          });
-
-          // 2. write the XML-string to memory
-          logger.log("Allocating memory for XML content...");
-          const ptrXml = Module._malloc(lengthBytesUTF8(xml) + 1);
-          stringToUTF8(xml, Module.HEAPU8, ptrXml, lengthBytesUTF8(xml) + 1);
-          logger.log("XML written to memory at pointer:", ptrXml);
-
-          // 3. parse XML-document
-          logger.log("Parsing XML document...");
-          const xmlDoc = Module.ccall(
-            'xmlReadMemory',
-            'number',
-            ['number', 'number', 'number', 'number', 'number'],
-            [ptrXml, lengthBytesUTF8(xml), null, null, 0]
-          );
-
-          // 4. load scheme from file DASH-MPD.xsd (that imports work)
-          logger.log(`Creating schema parser context for: /${mainSchemaFileName}`);
-          const schemaParserCtx = Module.ccall(
-            'xmlSchemaNewParserCtxt',
-            'number',
-            ['string'],
-            ['/' + mainSchemaFileName]
-          );
-          logger.log("Schema parser context created:", schemaParserCtx);
-
-          // 5. parse schema and create validation context
-          const schema = Module.ccall('xmlSchemaParse', 'number', ['number'], [schemaParserCtx]);
-          logger.log("Schema parsed, pointer:", schema);
-          const validCtx = Module.ccall('xmlSchemaNewValidCtxt', 'number', ['number'], [schema]);
-          logger.log("Validation context created:", validCtx);
-
-          // 6. validate XML
-          logger.log("Validating XML document against schema...");
-          const result = Module.ccall(
-            'xmlSchemaValidateDoc',
-            'number',
-            ['number', 'number'],
-            [validCtx, xmlDoc]
-          );
-
-          // 7. release memory
-          logger.log("Cleaning up memory...");
-          Module.ccall('xmlFreeDoc', 'void', ['number'], [xmlDoc]);
-          Module.ccall('xmlSchemaFreeValidCtxt', 'void', ['number'], [validCtx]);
-          Module.ccall('xmlSchemaFree', 'void', ['number'], [schema]);
-          Module.ccall('xmlSchemaFreeParserCtxt', 'void', ['number'], [schemaParserCtx]);
-          Module._free(ptrXml);
-
-          logger.log("=== VALIDATION RESULT ===");
-          logger.log("Raw validation result:", result);
-          logger.log("Validation success:", result === 0);
-
-          // 8. return result
-          const isValid = result === 0;
-          logger.log("=== VALIDATION FINISHED ===");
-          return isValid;
-
-        } catch (error) {
-          console.error("=== VALIDATION ERROR ===", error);
-          console.error("Error stack:", error.stack);
-          return false;
-        }
-      }
-
-      function stringToUTF8(str, heap, offset, maxBytesToWrite) {
-        logger.log("In function stringToUTF8");
-        if (!(maxBytesToWrite > 0)) return 0;
-        const utf8encoder = new TextEncoder();
-        const encoded = utf8encoder.encode(str);
-        const len = Math.min(encoded.length, maxBytesToWrite - 1);
-        heap.set(encoded.subarray(0, len), offset);
-        heap[offset + len] = 0;
-        return len;
-      } */
     </script>
   </body>
 </html>
