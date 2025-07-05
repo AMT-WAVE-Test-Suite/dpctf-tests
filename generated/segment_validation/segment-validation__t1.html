@@ -84,12 +84,14 @@
         let segmentUri = segmentList.playlists[0].segments.map(e => e.uri).map(e => baseUrl + e);
         let segmentDuration = segmentList.playlists[0].segments.map(e => e.duration);
 
+        // test case that fetch all segments if they exist on server side
         dpctfTest.asyncTest(function (test) {
           var query = location.search.replace(/\?/, "");
           var match = query.match(/redirect_time=([^&]+)/);
           var REDIRECT_TIME = match ? match[1] : null;
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
 
+          // time begin
           let testPass = true;
           let segmentTest = [];
           for (let i = 0; i < segmentUri.length; i++) {
@@ -107,6 +109,7 @@
           Promise.all(segmentTest)
           .then(() => {
             assert_true(testPass);
+            // time end
             test.done();
           })
           .catch(err => {
@@ -117,18 +120,21 @@
 
         }, "Segment exist on Server");
 
+        // test case that compare the segment durations with durations from the MPD
         dpctfTest.asyncTest(async function (test) {
           var query = location.search.replace(/\?/, "");
           var match = query.match(/redirect_time=([^&]+)/);
           var REDIRECT_TIME = match ? match[1] : null;
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
 
+          // time begin
           let resultArr = await startAnalyzing();
           if (resultArr.some(results => results == false)) {
             assert_true(false);
           } else {
             assert_true(true);
           }
+          // time end
           test.done();
           done();
         }, "Segment duration correct");
