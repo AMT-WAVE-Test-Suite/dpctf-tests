@@ -39,11 +39,11 @@
     <script>
       // Global variables
       var TEST_INFO = {
-        id: "xsd-validation",
+        id: "mpd-validation",
         title: "XSD Validation for MPD files",
         description:
           "Template for XSD Validations.",
-        code: "xsd-validation.html",
+        code: "mpd-validation.html",
       };
 
       var video = document.querySelector("video");
@@ -79,14 +79,9 @@
 
           let schemes = loadMainSchemaAndDependencies();
           let mpd = await getMPD();
-          await Promise.all(schemes).then(schemes => {
-            console.log("mpd: ", mpd);
-            console.log("Schema 1: ", schemes[0]);
-            console.log("Schema 2: ", schemes[1]);
-            console.log("Schema 3: ", schemes[2]);
-
-            return validate(mpd, schemes, logger)
-          }).then(result => {
+          await Promise.all(schemes).then(schemes =>
+            validate(mpd, schemes, logger)
+          ).then(result => {
             logger.log("MPD Validation result: " + result);
 
             assert_true(result);
@@ -123,6 +118,7 @@
             logger.log("Schema attributes already present");
           }
           logger.log(" MPD XML loaded successfully, final length:", mpd.length);
+          return mpd;
         });
       }
 

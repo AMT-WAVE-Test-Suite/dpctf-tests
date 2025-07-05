@@ -18408,13 +18408,13 @@
                 ]
             }
         },
-        "5e854edc0729b02f10ddf3e39c5b4d9d": {
-            "path": "C:\\Users\\l-hol\\Desktop\\Uni\\Advanced_Media_Technologies\\Forks\\dpctf-tests\\generated\\xml_validation/xsd-validation__t1.html",
+        "59233ede28f94b1b0843ce9a02b8774e": {
+            "path": "C:\\Users\\l-hol\\Desktop\\Uni\\Advanced_Media_Technologies\\Forks\\dpctf-tests\\generated\\mpd_validation/mpd-validation__t1.html",
             "video": [
                 "https://dash.akamaized.net/WAVE/vectors/cfhd_sets/15_30_60/t1/2023-09-01/stream.mpd"
             ],
             "audio": [],
-            "code": "C:\\Users\\l-hol\\Desktop\\Uni\\Advanced_Media_Technologies\\Forks\\dpctf-tests\\xsd-validation.html",
+            "code": "C:\\Users\\l-hol\\Desktop\\Uni\\Advanced_Media_Technologies\\Forks\\dpctf-tests\\mpd-validation.html",
             "switchingSets": {
                 "video": [
                     {
