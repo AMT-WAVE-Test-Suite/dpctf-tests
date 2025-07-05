@@ -18408,14 +18408,12 @@
                 ]
             }
         },
-        "b2eb8d71ef4c1bdc468abcf614678587": {
-            "path": "C:\\Users\\l-hol\\Desktop\\Uni\\Advanced_Media_Technologies\\Forks\\dpctf-tests\\generated\\xml_validation/xsd-validation__t1_MPDValidator.html",
+        "5e854edc0729b02f10ddf3e39c5b4d9d": {
+            "path": "C:\\Users\\l-hol\\Desktop\\Uni\\Advanced_Media_Technologies\\Forks\\dpctf-tests\\generated\\xml_validation/xsd-validation__t1.html",
             "video": [
                 "https://dash.akamaized.net/WAVE/vectors/cfhd_sets/15_30_60/t1/2023-09-01/stream.mpd"
             ],
-            "audio": [
-                "https://raw.githubusercontent.com/Dash-Industry-Forum/MPEG-Conformance-and-reference-source/refs/heads/master/conformance/MPDValidator/schemas/DASH-MPD.xsd"
-            ],
+            "audio": [],
             "code": "C:\\Users\\l-hol\\Desktop\\Uni\\Advanced_Media_Technologies\\Forks\\dpctf-tests\\xsd-validation.html",
             "switchingSets": {
                 "video": [
