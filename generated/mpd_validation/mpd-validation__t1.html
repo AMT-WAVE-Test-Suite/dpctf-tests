@@ -51,7 +51,8 @@
       var statusText = document.getElementById("status-text");
 
       var videoContentModel = ["https://dash.akamaized.net/WAVE/vectors/cfhd_sets/15_30_60/t1/2023-09-01/stream.mpd"];
-      var audioContentModel = []; // Now used for XSD file URL (for test purpose not)
+      var audioContentModel = [];
+      var xsdFileUrl = "https://raw.githubusercontent.com/Dash-Industry-Forum/MPEG-Conformance-and-reference-source/refs/heads/master/conformance/MPDValidator/schemas/DASH-MPD.xsd";
 
       var dpctfTest = new DpctfTest({
         testInfo: TEST_INFO,
@@ -83,8 +84,9 @@
             validate(mpd, schemes, logger)
           ).then(result => {
             logger.log("MPD Validation result: " + result);
-
             assert_true(result);
+            test.done();
+          }).catch(err => {
             test.done();
           });
         }, "MPD Schema Validation");
@@ -125,7 +127,6 @@
       // Load main schema and dependencies
       function loadMainSchemaAndDependencies() {
         let schemes = [];
-        let xsdFileUrl = "https://raw.githubusercontent.com/Dash-Industry-Forum/MPEG-Conformance-and-reference-source/refs/heads/master/conformance/MPDValidator/schemas/DASH-MPD.xsd";
         logger.log("=== Loading main schema and dependencies ===");
         logger.log("Main XSD URL:", xsdFileUrl);
         
