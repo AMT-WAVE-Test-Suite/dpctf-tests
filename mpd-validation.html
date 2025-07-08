@@ -84,7 +84,6 @@
             validate(mpd, schemes, logger)
           ).then(result => {
             logger.log("MPD Validation result: " + result);
-            assert_true(true);
             test.done();
           });
         }, "MPD Schema Validation");
