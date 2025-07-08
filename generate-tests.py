@@ -63,6 +63,8 @@ def main():
             template_file + "video" + video_mpd_url + "audio" + audio_mpd_url + grouping_dir)
 
         duplicate_test = None
+        if len(test) >= 5:
+            xsd_schema = test[4]
         if test[0] != "":
             for lookup_test in tests:
                 if lookup_test["id"] != test_id:
@@ -168,7 +170,7 @@ def main():
         test["path"] = test_path
         content = load_file(test_template_path)
         content = generate_test(
-            content, video_mpd_urls, audio_mpd_urls, test_path_relative, template_file)
+            content, video_mpd_urls, audio_mpd_urls, test_path_relative, template_file, xsd_schema)
 
         write_file(test_path, content)
 
@@ -456,12 +458,14 @@ def get_test_path(test_id):
     return Path(TESTS_DIR, test_id + ".html")
 
 
-def generate_test(template, video_mpd_url, audio_mpd_url, test_path, template_name):
+def generate_test(template, video_mpd_url, audio_mpd_url, test_path, template_name, xsd_schema):
     template = template.replace(
         "\"{{VIDEO_MPD_URL}}\"", json.dumps(video_mpd_url))
     template = template.replace(
         "\"{{AUDIO_MPD_URL}}\"", json.dumps(audio_mpd_url))
     template = template.replace("{{TEMPLATE_NAME}}", template_name)
+    template = template.replace(
+        "\"{{XSD_SCHEMA}}\"", json.dumps(xsd_schema))
     return template
 
 
