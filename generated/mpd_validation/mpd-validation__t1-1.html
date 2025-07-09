@@ -152,7 +152,9 @@
             .then(data => JSON.parse(JSON.stringify(data)));
 
         } catch (error) {
-          console.error("=== Error loading schemas ===", error);
+          logger.log("=== Error loading schemas ===");
+          logger.log(error);
+          console.error(error);
         }
         return schemes;
       }

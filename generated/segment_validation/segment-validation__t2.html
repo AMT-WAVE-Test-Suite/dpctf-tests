@@ -111,6 +111,7 @@
             test.done();
           })
           .catch(err => {
+            logger.log(err);
             console.error(err);
             test.step(() => assert_false(false, err));
             test.done();

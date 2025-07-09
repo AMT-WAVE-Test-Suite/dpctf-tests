@@ -42,7 +42,7 @@
                             logger.log(`Segment ${i} duration correct`);
                             results.push(true);
                         } else {
-                            console.log(`Segment ${i} duration incorrect!`);
+                            logger.log(`Segment ${i} duration incorrect!`);
                             results.push(false);
                         }
                         if (track.id == info.tracks.length) {
