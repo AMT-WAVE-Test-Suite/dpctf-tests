@@ -118,17 +118,6 @@
             logger.log("Schema attributes already present");
           }
 
-          console.log(mpd);
-          logger.log("Checking for xlink dependency");
-          const hasXLinkDependency = mpd.includes('namespace="http://www.w3.org/1999/xlink"');
-          
-          logger.log("Has xlink dependency:", hasXLinkDependency);
-          console.log(mpd.includes('schemaLocation="http://www.w3.org/XML/2008/06/xlink.xsd"'));
-          if (hasXLinkDependency) {
-            mpd = mpd.replace('schemaLocation="http://www.w3.org/XML/2008/06/xlink.xsd"', 'schemaLocation="xlink.xsd"');
-            logger.log("xlink schemaLocation URL replaced to local file");
-          }
-
           logger.log("MPD XML loaded successfully, final length:", mpd.length);
           return mpd;
         });
@@ -148,11 +137,22 @@
               logger.log("Main schema fetch response status:", res.status);
               return res.text();
             })
-            .then(data => {
-              logger.log("Main schema loaded, content length:", data.length);
-              return JSON.parse(JSON.stringify(data))
-            });
+            .then(data => JSON.parse(JSON.stringify(data)))
+            .then(xsd => {
+              logger.log("Checking for xlink dependency in main schema");
+              const hasXLinkDependency = xsd.includes('namespace="http://www.w3.org/1999/xlink"');
+              
+              logger.log("Has xlink dependency:", hasXLinkDependency);
 
+              if (hasXLinkDependency) {
+                xsd = xsd.replace('schemaLocation="http://www.w3.org/XML/2008/06/xlink.xsd"', 'schemaLocation="xlink.xsd"');
+                logger.log("xlink schemaLocation URL replaced to local file");
+              }
+
+              logger.log("Main schema loaded, content length:", xsd.length);
+              return xsd;
+            });
+          
           // Load all static dependencies
           logger.log("Starting dependency loading...");
 
