@@ -118,11 +118,12 @@
             logger.log("Schema attributes already present");
           }
 
+          console.log(mpd);
           logger.log("Checking for xlink dependency");
           const hasXLinkDependency = mpd.includes('namespace="http://www.w3.org/1999/xlink"');
           
-          logger.log("Has xlink dependency:", hasSchemaLocation);
-
+          logger.log("Has xlink dependency:", hasXLinkDependency);
+          console.log(mpd.includes('schemaLocation="http://www.w3.org/XML/2008/06/xlink.xsd"'));
           if (hasXLinkDependency) {
             mpd = mpd.replace('schemaLocation="http://www.w3.org/XML/2008/06/xlink.xsd"', 'schemaLocation="xlink.xsd"');
             logger.log("xlink schemaLocation URL replaced to local file");
