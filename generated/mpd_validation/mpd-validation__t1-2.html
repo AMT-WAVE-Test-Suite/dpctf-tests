@@ -117,6 +117,17 @@
           } else {
             logger.log("Schema attributes already present");
           }
+
+          logger.log("Checking for xlink dependency");
+          const hasXLinkDependency = mpd.includes('namespace="http://www.w3.org/1999/xlink"');
+          
+          logger.log("Has xlink dependency:", hasSchemaLocation);
+
+          if (hasXLinkDependency) {
+            mpd = mpd.replace('schemaLocation="http://www.w3.org/XML/2008/06/xlink.xsd"', 'schemaLocation="xlink.xsd"');
+            logger.log("xlink schemaLocation URL replaced to local file");
+          }
+
           logger.log("MPD XML loaded successfully, final length:", mpd.length);
           return mpd;
         });
