@@ -108,13 +108,17 @@
 
           Promise.all(segmentTest)
           .then(() => {
-            assert_true(testPass);
+            if (testPass) {
+              assert_true(true);
+            } else {
+              assert_false(false, "At least one segment not exist on server side");
+            }
             // time end
             test.done();
           })
           .catch(err => {
             console.error(err);
-            assert_true(false);
+            assert_false(false, err);
             test.done();
           });
 
@@ -130,13 +134,12 @@
           // time begin
           let resultArr = await startAnalyzing();
           if (resultArr.some(results => results == false)) {
-            assert_true(false);
+            assert_false(false, "At least one segment duration not fit with the MPD");
           } else {
             assert_true(true);
           }
           // time end
           test.done();
-          done();
         }, "Segment duration correct");
 
         async function startAnalyzing() {
