@@ -84,15 +84,7 @@
             validate(mpd, schemes, logger)
           ).then(result => {
             logger.log("MPD Validation result: " + result);
-            if (result) {
-              logger.log("TEST PASS");
-              assert_true(true);
-              test.status= test.statuses.PASS
-            } else {
-              logger.log("TEST FAIL");
-              assert_false(false, "Validation failed");
-              test.status = test.statuses.FAIL
-            }
+            test.step(() => assert_true(result, "MPD should be valid"));
             test.done();
           });
         }, "MPD Schema Validation");

@@ -91,7 +91,6 @@
           var REDIRECT_TIME = match ? match[1] : null;
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
 
-          // time begin
           let testPass = true;
           let segmentTest = [];
           for (let i = 0; i < segmentUri.length; i++) {
@@ -108,17 +107,12 @@
 
           Promise.all(segmentTest)
           .then(() => {
-            if (testPass) {
-              assert_true(true);
-            } else {
-              assert_false(false, "At least one segment not exist on server side");
-            }
-            // time end
+            test.step(() => assert_true(testPass, "Segments should exist on server side"));
             test.done();
           })
           .catch(err => {
             console.error(err);
-            assert_false(false, err);
+            test.step(() => assert_false(false, err));
             test.done();
           });
 
@@ -131,14 +125,8 @@
           var REDIRECT_TIME = match ? match[1] : null;
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
 
-          // time begin
           let resultArr = await startAnalyzing();
-          if (resultArr.some(results => results == false)) {
-            assert_false(false, "At least one segment duration not fit with the MPD");
-          } else {
-            assert_true(true);
-          }
-          // time end
+          test.step(() => assert_true(resultArr.every(results => results == true), "All segment durations should fit with the MPD"));
           test.done();
         }, "Segment duration correct");
 
