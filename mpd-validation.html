@@ -117,7 +117,7 @@
           } else {
             logger.log("Schema attributes already present");
           }
-          logger.log(" MPD XML loaded successfully, final length:", mpd.length);
+          logger.log("MPD XML loaded successfully, final length:", mpd.length);
           return mpd;
         });
       }
@@ -153,7 +153,7 @@
 
         } catch (error) {
           logger.log("=== Error loading schemas ===");
-          logger.log(error);
+          logger.log(error.message);
           console.error(error);
         }
         return schemes;
