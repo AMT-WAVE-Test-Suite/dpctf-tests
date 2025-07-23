@@ -69,9 +69,6 @@
       var logger = dpctfTest.getLogger();
 
       function executeTest(player, done, parameters) {
-        // var minBufferDuration = parameters.minBufferDuration / 1000;
-        // player.startBuffering();
-
         dpctfTest.asyncTest(async function (test) {
           var query = location.search.replace(/\?/, "");
           var match = query.match(/redirect_time=([^&]+)/);
@@ -86,13 +83,12 @@
             logger.log("MPD Validation result: ", result.valid);
             logger.log("MPD Validation message: ", JSON.stringify(result.msg));
             test.step(() => assert_true(result.valid, 
-            "MPD should be valid. Message from the Validator: " + JSON.stringify(result.msg) + (result.err.length > 0) ? "Error: " + result.err.join('\n') : ""));
+            "MPD should be valid. Message from the Validator: " + JSON.stringify(result.msg) + ((result.err.length > 0) ? "Error: " + result.err.join('\n') : "")));
             test.done();
           });
         }, "MPD Schema Validation");
 
         done();
-        // player.playOnBufferLoaded(minBufferDuration).then(done);
       }
 
       // Save MPD file as utf-8 string
