@@ -96,12 +96,12 @@
             segmentTest.push(fetch(segmentUri[i], {method: "HEAD"})
             .then(res => {
                 if (String(res.status).startsWith("4") || String(res.status).startsWith("5")) {
-                  let logMsg = `Segment ${i} / ${segmentUri.length}  not exist! Test failed.`;
+                  let logMsg = `Segment ${i+1} / ${segmentUri.length}  not exist! Test failed.`;
                   logger.log(logMsg);
                   reportLog.push(logMsg);
                   testPass = false;
                 } else {
-                  let logMsg = `Segment ${i} / ${segmentUri.length} exist.`;
+                  let logMsg = `Segment ${i+1} / ${segmentUri.length} exist.`;
                   logger.log(logMsg);
                   reportLog.push(logMsg);
                 }
@@ -130,7 +130,7 @@
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
 
           let resultArr = await startAnalyzing();
-          console.log(resultArr);
+          console.log(JSON.stringify(resultArr));
           test.step(() => assert_true(resultArr.map(resultObj => resultObj.results).flat().every(results => results == true), resultArr.map(e => e.reportLog).join('; ')));
           test.done();
         }, "Segment duration correct");
@@ -147,7 +147,7 @@
               results.push(
                 fetch(segmentUri[i])
                 .then(res => res.arrayBuffer())
-                .then(segment => segmentAnalyzer.analyzeSegment(init, segment, segmentDuration[i], logger, i, segmentUri.length-1))
+                .then(segment => segmentAnalyzer.analyzeSegment(init, segment, segmentDuration[i], logger, i+1, segmentUri.length))
             );               
           }
           return await Promise.all(results).then(res => res.flat());

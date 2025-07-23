@@ -70,7 +70,7 @@
 
         await resultFinished;
         let toReturn = {results: results, reportLog: reportLog};
-        console.log(toReturn);
+        console.log(JSON.stringify(toReturn));
         return toReturn;
     }
 
