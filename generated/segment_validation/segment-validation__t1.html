@@ -130,7 +130,6 @@
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
 
           let resultArr = await startAnalyzing();
-          console.log(JSON.stringify(resultArr));
           test.step(() => assert_true(resultArr.map(resultObj => resultObj.results).flat().every(results => results == true), resultArr.map(e => e.reportLog).join('; ')));
           test.done();
         }, "Segment duration correct");
