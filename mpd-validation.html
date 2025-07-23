@@ -27,12 +27,12 @@
     <div id="info-overlay"></div>
     <script src="../lib/mozilla/object-keys-polyfill.js"></script>
     <script src="../lib/stefanpenner/es6-promise.min.js"></script>
-    <script src="../lib/player.js"></script>
-    <script src="../lib/manifest_parser.js"></script>
-    <script src="../lib/mpd-parser.js"></script>
+    <!-- <script src="../lib/player.js"></script> -->
+    <!-- <script src="../lib/manifest_parser.js"></script> -->
+    <!-- <script src="../lib/mpd-parser.js"></script> -->
     <script src="../lib/wave-service.js"></script>
     <script src="../lib/davidshimjs/qrcode.js"></script>
-    <script src="../lib/dpctf-testharness.js"></script>
+    <!-- <script src="../lib/dpctf-testharness.js"></script> -->
     <script src="../lib/hbbtv.js"></script>
     <script src="../lib/xsdValidation/output.js"></script>
     <script src="../lib/xsdValidation/validator.js"></script>
@@ -69,8 +69,8 @@
       var logger = dpctfTest.getLogger();
 
       function executeTest(player, done, parameters) {
-        var minBufferDuration = parameters.minBufferDuration / 1000;
-        player.startBuffering();
+        // var minBufferDuration = parameters.minBufferDuration / 1000;
+        // player.startBuffering();
 
         dpctfTest.asyncTest(async function (test) {
           var query = location.search.replace(/\?/, "");
@@ -83,14 +83,14 @@
           await Promise.all(schemes).then(schemes =>
             validate(mpd, schemes, logger)
           ).then(result => {
-            logger.log("MPD Validation result: " + result.valid);
-            logger.log("MPD Validation message: ", result.msg);
+            logger.log("MPD Validation result: ", result.valid);
+            logger.log("MPD Validation message: ", JSON.stringify(result.msg));
             test.step(() => assert_true(result.valid, "MPD should be valid. Message from the Validator: " + JSON.stringify(result.msg)));
             test.done();
           });
         }, "MPD Schema Validation");
 
-        player.playOnBufferLoaded(minBufferDuration).then(done);
+        // player.playOnBufferLoaded(minBufferDuration).then(done);
       }
 
       // Save MPD file as utf-8 string
