@@ -27,12 +27,12 @@
     <div id="info-overlay"></div>
     <script src="../lib/mozilla/object-keys-polyfill.js"></script>
     <script src="../lib/stefanpenner/es6-promise.min.js"></script>
-    <script src="../lib/player.js"></script>
-    <script src="../lib/manifest_parser.js"></script>
+    <!-- <script src="../lib/player.js"></script> -->
+    <!-- <script src="../lib/manifest_parser.js"></script> -->
     <script src="../lib/mpd-parser.js"></script>
     <script src="../lib/wave-service.js"></script>
     <script src="../lib/davidshimjs/qrcode.js"></script>
-    <script src="../lib/dpctf-testharness.js"></script>
+    <script src="../lib/dpctf-testharnessWOplayer.js"></script>
     <script src="../lib/hbbtv.js"></script>
     <script src="../lib/segmentValidation/mp4box.all.global.js"></script>
     <script src="../lib/segmentValidation/segmentAnalyzer.js"></script>
@@ -68,8 +68,6 @@
 
       async function executeTest(player, done, parameters) {
         var logger = dpctfTest.getLogger();
-        var minBufferDuration = parameters.minBufferDuration / 1000;
-        player.startBuffering();
 
         // save MPD file as utf-8 string
         let mpd = await fetch(videoContentModel[0])
@@ -92,28 +90,33 @@
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
 
           let testPass = true;
+          let reportLog = [];
           let segmentTest = [];
           for (let i = 0; i < segmentUri.length; i++) {
             segmentTest.push(fetch(segmentUri[i], {method: "HEAD"})
             .then(res => {
                 if (String(res.status).startsWith("4") || String(res.status).startsWith("5")) {
-                  logger.log(`Segment ${i} not exist! Test failed.`);
+                  let logMsg = `Segment ${i} / ${segmentUri.length}  not exist! Test failed.`;
+                  logger.log(logMsg);
+                  reportLog.push(logMsg);
                   testPass = false;
                 } else {
-                  logger.log(`Segment ${i} exist.`);
+                  let logMsg = `Segment ${i} / ${segmentUri.length} exist.`;
+                  logger.log(logMsg);
+                  reportLog.push(logMsg);
                 }
             }));
           }
 
           Promise.all(segmentTest)
           .then(() => {
-            test.step(() => assert_true(testPass, "Segments should exist on server side"));
+            test.step(() => assert_true(testPass, reportLog.join('\n')));
             test.done();
           })
           .catch(err => {
             logger.log(err.message);
             console.error(err);
-            test.step(() => assert_false(false, err));
+            test.step(() => assert_false(false, JSON.stringify(err)));
             test.done();
           });
 
@@ -127,7 +130,7 @@
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
 
           let resultArr = await startAnalyzing();
-          test.step(() => assert_true(resultArr.every(results => results == true), "All segment durations should fit with the MPD"));
+          test.step(() => assert_true(resultArr.map(resultObj => resultObj.results).every(results => results == true), resultArr.map(e => e.reportLog).join('\n')));
           test.done();
         }, "Segment duration correct");
 
@@ -143,13 +146,13 @@
               results.push(
                 fetch(segmentUri[i])
                 .then(res => res.arrayBuffer())
-                .then(segment => segmentAnalyzer.analyzeSegment(init, segment, segmentDuration[i], logger, i))
+                .then(segment => segmentAnalyzer.analyzeSegment(init, segment, segmentDuration[i], logger, i, segmentUri.length))
             );               
           }
           return await Promise.all(results).then(res => res.flat());
         }
         
-        player.playOnBufferLoaded(minBufferDuration).then(done);
+        done();
       }
     </script>
   </body>

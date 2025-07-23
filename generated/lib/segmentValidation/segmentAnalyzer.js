@@ -7,7 +7,7 @@
       factory((global.segmentAnalyzer = {}), global.window, global.window));
 })(this, function (exports) {
 
-    var analyzeSegment = async function analyzeSegment (init, segment, expectedDuration, logger, i) {
+    var analyzeSegment = async function analyzeSegment (init, segment, expectedDuration, logger, i, segmentNumber) {
         
         // set start of the segment behind the init
         init.fileStart = 0;
@@ -17,6 +17,7 @@
         var allSamples = [];
         
         var results = [];
+        var reportLog = [];
 
         let resultFinished = new Promise((resolve) => {
             mp4boxfile.onReady = function (info) {
@@ -36,13 +37,17 @@
                         let durationUnits = samples.reduce((acc, cur) => acc + cur.duration, 0);
                         let durationSeconds = durationUnits / track.timescale;
 
-                        logger.log(`Segment ${i}: Expected duration (MPD): ${expectedDuration} - Segment duration: ${durationSeconds}`);
+                        let logMsg = `Segment ${i} / ${segmentNumber}: Expected duration (MPD): ${expectedDuration} - Segment duration: ${durationSeconds}`;
+                        logger.log(logMsg);
+                        reportLog.push(logMsg);
 
                         if (expectedDuration == durationSeconds) {
-                            logger.log(`Segment ${i} duration correct`);
+                            logger.log(`Segment ${i} / ${segmentNumber} duration correct`);
+                            reportLog.push(`Segment ${i} / ${segmentNumber} duration correct`);
                             results.push(true);
                         } else {
-                            logger.log(`Segment ${i} duration incorrect!`);
+                            logger.log(`Segment ${i} / ${segmentNumber} duration incorrect!`);
+                            reportLog.push(`Segment ${i} / ${segmentNumber} duration incorrect!`);
                             results.push(false);
                         }
                         if (track.id == info.tracks.length) {
@@ -64,7 +69,8 @@
         mp4boxfile.appendBuffer(segment);
 
         await resultFinished;
-        return results;
+        let toReturn = {results: results, reportLog: reportLog};
+        return toReturn;
     }
 
     exports.analyzeSegment = analyzeSegment;
