@@ -130,7 +130,8 @@
           if (!REDIRECT_TIME) REDIRECT_TIME = 5;
 
           let resultArr = await startAnalyzing();
-          test.step(() => assert_true(resultArr.map(resultObj => resultObj.results).every(results => results == true), resultArr.map(e => e.reportLog).join('\n')));
+          console.log(resultArr);
+          test.step(() => assert_true(resultArr.map(resultObj => resultObj.results).flat().every(results => results == true), resultArr.map(e => e.reportLog).join('; ')));
           test.done();
         }, "Segment duration correct");
 
@@ -146,7 +147,7 @@
               results.push(
                 fetch(segmentUri[i])
                 .then(res => res.arrayBuffer())
-                .then(segment => segmentAnalyzer.analyzeSegment(init, segment, segmentDuration[i], logger, i, segmentUri.length))
+                .then(segment => segmentAnalyzer.analyzeSegment(init, segment, segmentDuration[i], logger, i, segmentUri.length-1))
             );               
           }
           return await Promise.all(results).then(res => res.flat());
