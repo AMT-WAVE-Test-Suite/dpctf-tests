@@ -44,7 +44,6 @@ function validate(xml, schemes, logger) {
         ['number', 'number'],
         [validCtx, xmlDoc]
         );
-        
 
         // 7. release memory
         logger.log("Cleaning up memory...");
@@ -60,7 +59,7 @@ function validate(xml, schemes, logger) {
         // 8. return result
         const isValid = result === 0;
         logger.log("=== VALIDATION FINISHED ===");
-        return {valid: isValid, msg: "Validation finished"};
+        return {valid: isValid, msg: "Validation finished", err: errMsgList};
 
     } catch (error) {
         logger.log("=== VALIDATION ERROR ===");
