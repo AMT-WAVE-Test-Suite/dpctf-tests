@@ -83,8 +83,9 @@
           await Promise.all(schemes).then(schemes =>
             validate(mpd, schemes, logger)
           ).then(result => {
-            logger.log("MPD Validation result: " + result);
-            test.step(() => assert_true(result, "MPD should be valid"));
+            logger.log("MPD Validation result: " + result.valid);
+            logger.log("MPD Validation message: ", result.msg);
+            test.step(() => assert_true(result.valid, "MPD should be valid. Message from the Validator: " + JSON.stringify(result.msg)));
             test.done();
           });
         }, "MPD Schema Validation");

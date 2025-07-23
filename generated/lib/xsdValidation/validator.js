@@ -60,14 +60,14 @@ function validate(xml, schemes, logger) {
         // 8. return result
         const isValid = result === 0;
         logger.log("=== VALIDATION FINISHED ===");
-        return isValid;
+        return {valid: isValid, msg: "Validation finished"};
 
     } catch (error) {
         logger.log("=== VALIDATION ERROR ===");
         logger.log(error.message);
         console.error("=== VALIDATION ERROR ===", error);
         console.error("Error stack:", error.stack);
-        return false;
+        return {valid: false, msg: error};
     }
 }
 

@@ -556,6 +556,7 @@
 
 "mpd-validation","https://dash.akamaized.net/WAVE/vectors/cfhd_sets/15_30_60/t1/2023-09-01/stream.mpd","","mpd_validation","https://raw.githubusercontent.com/Dash-Industry-Forum/MPEG-Conformance-and-reference-source/refs/heads/master/conformance/MPDValidator/schemas/DASH-MPD.xsd"
 "mpd-validation","https://dash.akamaized.net/WAVE/vectors/cfhd_sets/15_30_60/t1/2023-09-01/stream.mpd","","mpd_validation","https://raw.githubusercontent.com/Dash-Industry-Forum/DASH-IF-Conformance/31a194c6ecb5fe6b53247b88b014f6b745dba7df/DASH/mpdvalidator/schemas/DASH-MPD.xsd"
+"mpd-validation","/content/testToDelete/invalid.mpd","","mpd_validation","https://raw.githubusercontent.com/Dash-Industry-Forum/DASH-IF-Conformance/31a194c6ecb5fe6b53247b88b014f6b745dba7df/DASH/mpdvalidator/schemas/DASH-MPD.xsd"
 
 "segment-validation","https://dash.akamaized.net/WAVE/vectors/cfhd_sets/15_30_60/t1/2023-09-01/stream.mpd","","segment_validation"
 "segment-validation","/content/cfhd_sets/14.985_29.97_59.94/t2/2023-09-01/stream.mpd","","segment_validation"
