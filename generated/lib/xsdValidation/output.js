@@ -104,7 +104,9 @@ var out = console.log.bind(console);
 var errMsgList = [];
 function err(msg) {
   if (msg == 'I/O warning : failed to load "": No such file or directory' ||
-     msg == "Schemas parser error : Failed to locate the main schema resource at ''.") {
+      msg == "Schemas parser error : Failed to locate the main schema resource at ''." ||
+      msg == "wasm streaming compile failed: TypeError: Failed to execute 'compile' on 'WebAssembly': Incorrect response MIME type. Expected 'application/wasm'." ||
+      msg == "falling back to ArrayBuffer instantiation") {
     console.warn(msg);
     return;
   } else {
