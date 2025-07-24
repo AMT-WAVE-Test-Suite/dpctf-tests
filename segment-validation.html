@@ -41,7 +41,7 @@
         id: "segment-validation",
         title: "Segment Validation",
         description:
-          "Test if segments exists on server side with HTTP HEAD requests.",
+          "Test whether segments exists on server side and also tests the duration of the segments against the expected from the MPD.",
         code: "{{TEMPLATE_NAME}}",
       };
 
@@ -82,6 +82,7 @@
 
         // test case that fetch all segments if they exist on server side
         dpctfTest.asyncTest(function (test) {
+          logger.log("=== Existence Test start ===");
           var query = location.search.replace(/\?/, "");
           var match = query.match(/redirect_time=([^&]+)/);
           var REDIRECT_TIME = match ? match[1] : null;
@@ -109,9 +110,11 @@
           Promise.all(segmentTest)
           .then(() => {
             test.step(() => assert_true(testPass, reportLog.join('\n')));
+            logger.log("=== Existence Test end ===");
             test.done();
           })
           .catch(err => {
+            logger.log("=== Existence Test end with error ===");
             logger.log(err.message);
             console.error(err);
             test.step(() => assert_false(false, JSON.stringify(err)));
@@ -122,6 +125,7 @@
 
         // test case that compare the segment durations with durations from the MPD
         dpctfTest.asyncTest(async function (test) {
+          logger.log("=== Duration Test start ===");
           var query = location.search.replace(/\?/, "");
           var match = query.match(/redirect_time=([^&]+)/);
           var REDIRECT_TIME = match ? match[1] : null;
@@ -129,6 +133,7 @@
 
           let resultArr = await startAnalyzing();
           test.step(() => assert_true(resultArr.map(resultObj => resultObj.results).flat().every(results => results == true), resultArr.map(e => e.reportLog).join('; ')));
+          logger.log("=== Duration Test end ===");
           test.done();
         }, "Segment duration correct");
 
