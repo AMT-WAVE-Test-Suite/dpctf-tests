@@ -103,9 +103,13 @@ readAsync = async (url) => {
 var out = console.log.bind(console);
 var errMsgList = [];
 function err(msg) {
-  console.error(msg);
   if (msg == 'I/O warning : failed to load "": No such file or directory' ||
-     msg == "Schemas parser error : Failed to locate the main schema resource at ''.") return;
+     msg == "Schemas parser error : Failed to locate the main schema resource at ''.") {
+    console.warn(msg);
+    return;
+  } else {
+    console.error(msg);
+  }
 
   errMsgList.push(msg);
 }
