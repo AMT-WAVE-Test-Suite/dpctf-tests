@@ -111,7 +111,7 @@
           .then(() => {
             test.step(() => assert_true(testPass, reportLog.join('\n')));
             logger.log("=== Existence Test end ===");
-            test.done({message: "test"});
+            test.done();
           })
           .catch(err => {
             logger.log("=== Existence Test end with error ===");
