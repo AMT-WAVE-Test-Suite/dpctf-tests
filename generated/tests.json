@@ -18408,23 +18408,6 @@
                 ]
             }
         },
-        "5734983d953f88e55f6dfdf5bd90061c": {
-            "path": "C:\\Users\\l-hol\\Desktop\\Uni\\Advanced_Media_Technologies\\Forks\\dpctf-tests\\generated\\mpd_validation/mpd-validation__content.html",
-            "video": [
-                "/content/testToDelete/invalid.mpd"
-            ],
-            "audio": [],
-            "code": "C:\\Users\\l-hol\\Desktop\\Uni\\Advanced_Media_Technologies\\Forks\\dpctf-tests\\mpd-validation.html",
-            "switchingSets": {
-                "video": [
-                    {
-                        "cmaf_track_duration": "PT634.566S",
-                        "representations": {}
-                    }
-                ],
-                "audio": []
-            }
-        },
         "5b639f4a601e90f4f3febc723db89331": {
             "path": "C:\\Users\\l-hol\\Desktop\\Uni\\Advanced_Media_Technologies\\Forks\\dpctf-tests\\generated\\segment_validation/segment-validation__t1.html",
             "video": [
