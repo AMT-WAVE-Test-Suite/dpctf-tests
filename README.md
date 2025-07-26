@@ -61,6 +61,8 @@ You can refer to the [tests.csv](./tests.csv) for examples.
 | mse-appendwindow                                                                 | [mse-appendwindow.html](./mse-appendwindow.html)                                                                                                                                 | 8.22          |
 | low-latency-short-buffer-playback                                                | [low-latency-short-buffer-playback.html](./low-latency-short-buffer-playback.html)                                                                                               | 8.23          |
 | random-access-from-one-place-in-a-stream-to-a-different-place-in-the-same-stream | [random-access-from-one-place-in-a-stream-to-a-different-place-in-the-same-stream.html](./random-access-from-one-place-in-a-stream-to-a-different-place-in-the-same-stream.html) | 8.24          |
+| mpd-validation | [mpd-validation.html](./mpd-validation.html) |           |
+| segment-validation | [segment-validation.html](./segment-validation.html) |           |
 
 Specification numbers refer to section numbers in [the DPCTF specification](https://cdn.cta.tech/cta/media/media/resources/standards/pdfs/cta-5003-final.pdf).
 
